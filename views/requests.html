@@ -1,0 +1,31 @@
+<header >
+    <nav class="navbar navbar-default  navbar-fixed-top" style="background-color:#E82D50;">
+        <div class="container-fluid">
+          <div class="navbar-header">
+               <a href="#/" style="font-size:20px; color:white;">Schedule    |     </a>
+               <td style="padding:30px;"> <a href="#/requests" style="font-size:20px; color:white;">Requests</a>
+            </div>
+          	<!-- Right Justified Nav -->
+          	<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            	<ul class="nav navbar-nav navbar-right">
+              		<li> <a href="#/" style="font-size:20px; color:white;">Home</a></li>
+              		<li ng-if="!session"> <td style="padding:30px;"> <a href="#/login" ng-click="signout()" style="font-size:20px; color:white;">Login</a></li>
+              		<li ng-if="session"> <td style="padding:30px;"> <a href="#/login" ng-click="signout()" style="font-size:20px; color:white;">Sign Out</a></li>
+            	</ul>
+          	</div>
+        </div>
+    </nav>
+</header>
+<br><br>
+<div class="row" ng-if="requests">
+	<center>
+		<br><br>
+		<div ng-repeat="req in requests">
+			Time: {{req.startTime | date:"MMMM dd yyyy'-'hh:mma"}} <br>
+			Patient Name: {{req.patient}}<br>
+			Reason For Visit: {{req.comment}} <br><br>
+				<button>Suggest new time</button> <button ng-click="confirmAppointment(req)">Confirm</button> <button ng-click="cancelAppointment(req)">Cancel</button>
+				<br><br>
+		</div>
+	</center>
+</div>

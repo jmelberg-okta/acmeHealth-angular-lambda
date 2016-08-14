@@ -1,0 +1,44 @@
+<header >
+    <nav class="navbar navbar-default  navbar-fixed-top" style="background-color:#E82D50;">
+        <div class="container-fluid">
+	        <div class="navbar-header">
+               <a href="#/" style="font-size:20px; color:white;">Schedule    |     </a>
+               <td style="padding:30px;"> <a href="#/requests" style="font-size:20px; color:white;">Requests</a>
+          	</div>
+          	<!-- Right Justified Nav -->
+          	<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            	<ul class="nav navbar-nav navbar-right">
+              		<li> <a href="#/" style="font-size:20px; color:white;">Home</a></li>
+              		<li ng-if="!session"> <td style="padding:30px;"> <a href="#/login" ng-click="signout()" style="font-size:20px; color:white;">Login</a></li>
+              		<li ng-if="session"> <td style="padding:30px;"> <a href="#/login" ng-click="signout()" style="font-size:20px; color:white;">Sign Out</a></li>
+            	</ul>
+          	</div>
+        </div>
+    </nav>
+</header>
+<br><br>
+<div class="row" ng-if="auth">
+	<div class="col-md-3"><br />
+		<ul ng-repeat="(key, date) in sorted">
+			{{key}}
+			<!-- {{date | date: 'MMMM'}} -->
+			<li ng-repeat="(key, val) in date | limitTo:1" ng-click="updateAppointmentList(key)">
+				{{key | date:'MMMM'}} - {{val.length}}
+			</li>
+		</ul>
+	</div>
+	<div class="col-md-1"></div>
+	<div class="col-md-8">
+		<br><br>
+		<ul ng-repeat="appointment in appointments">
+			Time: {{appointment.startTime | date:'hh:mma'}} <br> 
+			Reason for visit: {{appointment.comment}} <br>
+		</ul>
+	</div>
+
+</div>
+
+<div ng-if="!auth">
+	<br />
+	<h3> Please <a href="#/login"> Sign in to continue</a></h3>
+</div>
