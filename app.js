@@ -44,22 +44,21 @@ app.value("clientScopes", undefined);
 
 app.run(function(authClient){
 	oktaClient = authClient.create({
-		baseUrl: "https://example.oktapreview.com",
-		id: "ViczvMucBWT14qg3lAM1",
-		redirect: "http://localhost:8080/"
+		baseUrl: "https://jordandemo.oktapreview.com",
+		id: "Jw1nyzbsNihSuOETY3R1",
+		redirect: "http://localhost:8080"
 	});
 	oktaAuth = authClient;
 	clientScopes = [
 		'openid',
 		'email',
 		'profile',
-		'groups'
+		'groups',
+		'appointments:read',
+		'providers:read',
+		'appointments:write'
 		];
 });
-
-
-
-var API_URL = "http://localhost:9000/protected"
 
 var toJsonDate = function(item) {
 	var itemDate = item.startTime.split('T')[0].split('-');
@@ -70,123 +69,98 @@ var toJsonDate = function(item) {
 }
 
 var getFirstAppointment = function(json) {
-	return toJsonDate(json.data[0]);
+	for(var month in json) {
+		if(json.hasOwnProperty(month)) {
+			var date = json[month];
+			for(var appt in date) {
+				if(date.hasOwnProperty(appt)) {	return date[appt][0];	}
+			}
+		}
+	}
+}
+
+var filterAppointments = function(appointmentData, date) {
+	// Date format : MM/DD/YYYY
+	var dailyAppointments = [];
+	angular.forEach(JSON.parse(appointmentData), function(item) {
+		if(item.startTime == date){	dailyAppointments.push(item);	}
+	});
+	return dailyAppointments;
 }
 
 app.controller("ScheduleController",
 	function($scope, $window, $location, $timeout, $route, $anchorScroll, $http, authClient, apiClient) {
 		var auth = $window.localStorage["auth"];
-		var userInfo = $window.localStorage["userInfo"];
 		var session = $window.localStorage["session"];
+		console.log(auth, session);
+		if(angular.isUndefined(auth) || angular.isUndefined(session)){
+			$location.url("/login");
+		}
+		var tokens = !angular.isUndefined($window.localStorage["tokens"]) ? JSON.parse($window.localStorage["tokens"]) : undefined;
+		var id = tokens.idToken.claims.sub;
+		var accessToken = tokens.accessToken.accessToken;		
 
-
-		apiClient.getAppointments()
+		apiClient.getAppointments(accessToken)
 		.then(function(appointments) {
-			$window.localStorage["appointments"] = appointments;
+			var appointmentJSON = JSON.parse(appointments).data;
+			var confirmedAppointments = [];
+			angular.forEach(appointmentJSON, function(item){
+				if(item.providerId == id && item.status == "CONFIRMED") {
+					confirmedAppointments.push(item);
+				}
+			});
+			$window.localStorage["appointments"] = angular.toJson(appointments);
+			$window.localStorage["confirmedAppointments"] = angular.toJson(confirmedAppointments);
 		}, function (err) {
 			console.error(err);
 		});
+
+		var confirmedAppointments = $window.localStorage["confirmedAppointments"];
 		var appointmentData = $window.localStorage["appointments"];
 
-		/* appointmentsSorted object:
-			month : {
-				startDate : appointments
-			}
-		*/
-
-		var appointmentDays = function() {
+		// Vars to init
+		var appointments = undefined;
+		var sorted = undefined;
+		if(!angular.isUndefined(confirmedAppointments) && JSON.parse(confirmedAppointments).length > 0){
+			// Format appts
 			var appointmentsByDate = {}
-			angular.forEach(JSON.parse(appointmentData).data, function(item) {
+			angular.forEach(JSON.parse(confirmedAppointments), function(item) {
 				var months = [
-								"January", "February", "March",
-								"April", "May", "June", "July", "August",
-								"September", "October", "November", "December"
-							];
+					"January", "February", "March",
+					"April", "May", "June", "July", "August",
+					"September", "October", "November", "December"
+				];
 				var jsonDate = toJsonDate(item);
 				var date = item.startTime.split('T')[0].split('-');
 				var month = jsonDate.split('/')[0];
 				
+				if(!appointmentsByDate[months[month-1]]){appointmentsByDate[months[month-1]] = {}}
+				if(!appointmentsByDate[months[month-1]][item.startTime]){appointmentsByDate[months[month-1]][item.startTime] = []}
+				appointmentsByDate[months[month-1]][item.startTime].push(item);
 
-				if(!appointmentsByDate[months[month-1]]){
-					appointmentsByDate[months[month-1]] = {}
-				}
-				if(!appointmentsByDate[months[month-1]][jsonDate]){
-					appointmentsByDate[months[month-1]][jsonDate] = []
-				}
-				appointmentsByDate[months[month-1]][jsonDate].push(item);
 			});
-			return appointmentsByDate;
+
+			var firstAppt = getFirstAppointment(appointmentsByDate);
+			var setInitialApptView = filterAppointments(confirmedAppointments, firstAppt.startTime);
+			appointments = setInitialApptView;
+			sorted = appointmentsByDate;		
+		} else {
+			appointments = confirmedAppointments;
+			sorted = confirmedAppointments;
 		}
 
 		// Update scope
-		$scope.session = session;
 		$scope.auth = !angular.isUndefined(auth) ? JSON.parse(auth) : undefined;
-		$scope.appointmentData = !angular.isUndefined(appointmentData) ? JSON.parse(appointmentData) : undefined;
-		$scope.userInfo = !angular.isUndefined(userInfo) ? JSON.parse(userInfo) : undefined;
-		$scope.sorted = appointmentDays();
-
-		var firstAppt = getFirstAppointment(JSON.parse(appointmentData));
-
+		$scope.session = session;
+		$scope.tokens = tokens;
+		if(angular.isUndefined(appointments) || angular.isUndefined(sorted)){
+			refresh(100);
+		}
+		$scope.appointments = appointments;
+		$scope.sorted = sorted;
 
 		$scope.updateAppointmentList = function(date) {
-			// Date format : MM/DD/YYYY
-			var dailyAppointments = [];
-			angular.forEach(JSON.parse(appointmentData).data, function(item) {
-				var jsonDate = toJsonDate(item);
-
-				if(jsonDate == date){
-					dailyAppointments.push(item);
-				}
-			});
-			$scope.appointments = dailyAppointments;
-		}
-
-		var setInitialApptView = $scope.updateAppointmentList(firstAppt);
-
-		/**
-		 *	Gets the Id and Access Token
-		 */
-		$scope.getTokens = function(auth) {
-			var options = {
-				'token' : auth.transaction.sessionToken,
-				'responseType' : ['id_token', 'token'], // Requires list for multiple inputs
-				'scopes' : clientScopes
-			};
-			oktaAuth.getTokens(options)
-			.then(function(res){
-				$window.localStorage["userInfo"] = angular.toJson(res);
-				refresh(100);
-				$location.hash("userInfoAnchor");
-	  			$anchorScroll();
-			}, function(err){
-				console.error(err);
-			});
-		}
-
-		/**
-		 *	Calls external server to return Gavatar image url and name
-		 */
-		$scope.apiCall = function(token) {
-			api_url = API_URL;
-			$http({
-				method : "GET",
-				url : api_url,
-				headers : {
-					"Content-Type": undefined,
-					Authorization : "Bearer " + token,
-				} 
-			}).then(function(res){
-				if(res.data.Error){
-					console.error(res.data.Error);
-				} else {
-					$window.localStorage["image"] = res.data.image;
-					$window.localStorage["imageName"] = res.data.name;
-					$scope.img = res.data.image;
-					$scope.imgName = res.data.name;
-					$location.hash("imgAnchor");
-					$anchorScroll();
-				}
-			});
+			$scope.appointments = filterAppointments(confirmedAppointments, date);
 		}
 
 	  	/**
@@ -211,8 +185,8 @@ app.controller("ScheduleController",
 			$timeout(function() {
 				oktaAuth.signout()
 				.then(function(res){
-					console.log(res);
 					clearStorage();
+					console.log(res);
 					$location.url("/login");
 				}, function(err){
 					console.log(err);
@@ -222,49 +196,44 @@ app.controller("ScheduleController",
 });
 
 app.controller("RequestsController",
-	function($scope, $window, authClient, apiClient) {
-
+	function($scope, $window, $route, authClient, apiClient) {
+		var auth = $window.localStorage["auth"];
+		var session = $window.localStorage["session"];
 		var appointmentData = JSON.parse($window.localStorage["appointments"]);
 		var pending = [];
+		var tokens = !angular.isUndefined($window.localStorage["tokens"]) ? JSON.parse($window.localStorage["tokens"]) : undefined;
+		var id = tokens.idToken.claims.sub;
+		var accessToken = tokens.accessToken.accessToken;
+
 		angular.forEach(appointmentData.data, function(item){
-			if(item.status != "CONFIRMED") {
+			if(item.status == "REQUESTED" && item.providerId == id) {
 				pending.push(item);
 			}
 		});
+
+		// Update scope
 		$scope.requests = pending;
+		$scope.tokens = tokens;
+		$scope.auth = !angular.isUndefined(auth) ? JSON.parse(auth) : undefined;
+		$scope.session = session;
 
 		$scope.cancelAppointment = function(appointment) {
-			var cancel = apiClient.cancelAppointment(appointment);
+			var cancel = apiClient.cancelAppointment(appointment, accessToken);
 			cancel.then(function(res) {
-				var appointments = apiClient.getAppointments();
-				appointments.then(function(appointments) {
-					$window.localStorage["appointments"] = appointments;
-					$window.location.reload();
-				}, function (err) {
-					console.error(err);
-				});
+				$route.reload();
 			}, function(error) {
 				console.error(error);
 			});
 		}
 
 		$scope.confirmAppointment = function(appointment) {
-			var confirm = apiClient.confirmAppointment(appointment);
+			var confirm = apiClient.confirmAppointment(appointment, accessToken);
 			confirm.then(function(res) {
-				console.log(res);
-				var appointments = apiClient.getAppointments();
-				appointments.then(function(appointments) {
-					$window.localStorage["appointments"] = appointments;
-					$window.location.reload();
-				}, function (err) {
-					console.error(err);
-				});
+				$route.reload();
 			}, function(error) {
 				console.error(error);
 			});
 		}
-
-		
 });
 
 /**
@@ -273,33 +242,45 @@ app.controller("RequestsController",
  * 	Stores the response object in localStorage and sets the current session to true
  */
 app.controller("LoginController",
-	function($scope, $window, authClient, apiClient){
-
-		$scope.login = function() {
-				$scope.active = true;
-		}
-
+	function($scope, $window, $timeout, authClient, apiClient){
 		$scope.authenticate = function(user) {
+
 			var res = authClient.login(user.email, user.password);
 			res.then(function(res){
+				
 				// update storage
 				$window.localStorage["auth"] = res.auth;
 				$window.localStorage["session"] = res.session;
-				var authJSON = !angular.isUndefined(res.auth) ? JSON.parse(res.auth) : undefined;
-				
-				// call api
-				var id = authJSON.transaction.user.id;
-				
-				var appointments = apiClient.getAppointments();
-				appointments.then(function(appointments) {
-					$window.localStorage["appointments"] = appointments;
-					oktaClient.session.setCookieAndRedirect(res.sessionToken,
-						oktaClient.options.redirectUri);
-				}, function (err) {
-					console.error(err);
-				});
+				console.log('authenticated');
 
-			}, function(err) {});
+				var options = {
+					'token' : res.sessionToken,
+					'responseType' : ['id_token', 'token'], // Requires list for multiple inputs
+					'scopes' : clientScopes
+				};
+
+				var tokens = authClient.getTokens(options);
+				tokens.then(function(result) {
+					var renewIdToken = authClient.renewIdToken(clientScopes);
+					renewIdToken.then(function(newToken) {
+						$window.localStorage["tokens"] = angular.toJson({
+						"idToken" : newToken["idToken"],
+						"accessToken" : result["accessToken"]
+						});
+						}, function(err) { console.error(err); }
+					);
+					$timeout(function(){
+						// Populate appointments
+						oktaClient.session.setCookieAndRedirect(res.sessionToken,
+								oktaClient.options.redirectUri+"/#");
+					}, 1000);
+					
+				}, function(error) {console.log(error)});
+
+			}, function(err) {console.error(err)});
+
+			
+			
 		};
 });
 

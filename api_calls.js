@@ -2,18 +2,21 @@ angular
 .module("ApiClient", [])
 .factory("apiClient", function($q, $http, $timeout) {
 
-	var BASE_URL = "https://5ef909db.ngrok.io";
+	var BASE_URL = "http://localhost:8088";
 	var apiClient = {};
 
-	apiClient.getAppointments = function() {
+	apiClient.getAppointments = function(token) {
 		var deferred = $q.defer();
-
 		api_url = BASE_URL + "/appointments";
+
 		$http({
 			method : "GET",
 			url : api_url,
-			headers : {	"Content-Type": "application/json" } 
-			})
+			headers : {
+				"Content-Type": "application/json",
+				Authorization : "Bearer " + token
+			} 
+		})
 		.then(function(res){
 			if(res.data.Error){
 				deferred.reject(res.data.Error);
@@ -25,7 +28,7 @@ angular
 		return deferred.promise;
 	};
 
-	apiClient.confirmAppointment = function(appointment) {
+	apiClient.confirmAppointment = function(appointment, token) {
 		appointment["status"] = "CONFIRMED"
 		var deferred = $q.defer();
 		api_url = BASE_URL + "/appointments/" + appointment["_id"];
@@ -33,7 +36,10 @@ angular
 			method: "PUT",
 			url : api_url,
 			data : appointment,
-			headers : { "Content-Type" : "application/json"}
+			headers : {
+				"Content-Type" : "application/json",
+				Authorization : "Bearer " + token
+			}
 		})
 		.then(function(res) {
 			if(res.data.Error) {
@@ -43,7 +49,7 @@ angular
 		return deferred.promise;
 	}
 
-	apiClient.cancelAppointment = function(appointment) {
+	apiClient.cancelAppointment = function(appointment, token) {
 		appointment["status"] = "DENIED"
 		var deferred = $q.defer();
 		api_url = BASE_URL + "/appointments/" + appointment["_id"];
@@ -51,7 +57,10 @@ angular
 			method: "PUT",
 			url : api_url,
 			data : appointment,
-			headers : { "Content-Type" : "application/json"}
+			headers : {
+				"Content-Type" : "application/json",
+				Authorization : "Bearer " + token
+			}
 		})
 		.then(function(res) {
 			if(res.data.Error) {
@@ -75,6 +84,23 @@ angular
 			} else { deferred.resolve(res)}
 		}, function(err) {deferred.reject(err)});
 		return deferred.promise;
+	}
+
+	apiClient.populate = function(data) {
+		var deferred = $q.defer();
+		api_url = BASE_URL + "/populate";
+		$http({
+			method: "POST",
+			url : api_url,
+			headers : {"Content-Type" : "application/json"},
+			data: data
+		})
+		.then(function(res) {
+			if(res.data.Error) { deferred.reject(res.data.Error);}
+			else{ deferred.resolve(res); }
+		}, function(err) {deferred.reject(err)});
+		return deferred.promise;
+
 	}
 
 	return apiClient;

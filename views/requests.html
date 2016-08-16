@@ -8,7 +8,7 @@
           	<!-- Right Justified Nav -->
           	<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
             	<ul class="nav navbar-nav navbar-right">
-              		<li> <a href="#/" style="font-size:20px; color:white;">Home</a></li>
+              		<li> <a href="#/" style="font-size:20px; color:white;">{{tokens.idToken.claims.name}}</a></li>
               		<li ng-if="!session"> <td style="padding:30px;"> <a href="#/login" ng-click="signout()" style="font-size:20px; color:white;">Login</a></li>
               		<li ng-if="session"> <td style="padding:30px;"> <a href="#/login" ng-click="signout()" style="font-size:20px; color:white;">Sign Out</a></li>
             	</ul>
@@ -17,15 +17,55 @@
     </nav>
 </header>
 <br><br>
-<div class="row" ng-if="requests">
-	<center>
-		<br><br>
-		<div ng-repeat="req in requests">
-			Time: {{req.startTime | date:"MMMM dd yyyy'-'hh:mma"}} <br>
-			Patient Name: {{req.patient}}<br>
-			Reason For Visit: {{req.comment}} <br><br>
-				<button>Suggest new time</button> <button ng-click="confirmAppointment(req)">Confirm</button> <button ng-click="cancelAppointment(req)">Cancel</button>
-				<br><br>
-		</div>
-	</center>
+<div class="row">
+  <div class="col-md-3"></div>
+  <div class="col-md-6" ng-if="requests">
+  	<center>
+  		<br><br>
+  		<ul ng-repeat="req in requests" style="background-color: white; border: 5px solid gray; box-shadow: 10px 10px 5px grey;">
+  			<div class="box">{{req.startTime | date:"MMMM dd yyyy'-'hh:mma"}}</div> <br>
+        <br>
+        <table style="width:80%">
+          <tr><td style="color:gray; text-transform: uppercase;">Patient Name</td> <td> <b>{{req.patient}}</b> <br></td></tr>
+          <tr><td style="color:gray; text-transform: uppercase;">Reason for visit </td> <td>{{req.comment}} <br></td></tr>
+          <tr><td><br><br></td></tr>
+          <tr><td><button>Suggest new time</button></td><td><button ng-click="confirmAppointment(req)">Confirm</button></td><td><button ng-click="cancelAppointment(req)">Cancel</button></td>
+        </table>
+        <br>
+  		</ul>
+      <div ng-show="!requests.length">
+        No current requests
+      </div>
+  	</center>
+  </div>
+  <div class="col-md-3"></div>
 </div>
+
+
+
+
+<style>
+  body {
+    background-color: #fafafa
+  }
+
+  .box {
+    background-color: #E82D50;
+    width: 200px;
+    text-align:left;
+    color: white;
+    border: 1px solid gray;
+    padding: 0px;
+    margin: 0px;
+  }
+
+  .centerDiv {
+    position: absolute;
+    top: 20%;
+    left: 20%;
+    margin-top: -50px;
+    margin-left: -50px;
+    width: 500px;
+    height: 500px;
+  }
+</style>

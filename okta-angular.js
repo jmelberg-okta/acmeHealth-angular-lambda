@@ -82,24 +82,19 @@ angular
 	 *	and user "clams"
 	 */
 	var getTokens = function(options) {
+		console.log(options);
 		var deferred = $q.defer();
 		if(auth.session.exists()){
-			console.log(options.scopes);
 			auth.token.getWithoutPrompt({
 				sessionToken: options.token,
 				responseType : options.responseType,
-				scope : options.scopes
+				scopes : options.scopes
 			}).then(function(res) {
-				console.log(res);
 				var tokens = {};
 				if(angular.isArray(res)){
 					angular.forEach(res, function(val) {
-						if("accessToken" in val){
-							tokens["accessToken"] = val;
-						}
-						if ("idToken" in val){
-							tokens["idToken"] = val;
-						}
+						if("accessToken" in val){ 	tokens["accessToken"] = val;	}
+						if ("idToken" in val){	tokens["idToken"] = val; 	}
 					});
 				} else {
 					if (res.hasOwnProperty("accessToken")){ tokens["accessToken"] = res; }
@@ -148,7 +143,7 @@ angular
 	 *	Renews the current ID token
 	 */
 	var renewIdToken = function(options) {
-		var scopes = {'scope' : options};
+		var scopes = {'scopes' : options};
 		var deferred = $q.defer();
 		auth.idToken.refresh(scopes)
 		.then(function(res) {
