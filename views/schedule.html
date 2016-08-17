@@ -17,8 +17,8 @@
     </nav>
 </header>
 <br><br>
-<div class="row" ng-if="auth && sorted">
-	<div class="col-md-4" style="background-color: white; border: 1px solid gray;"><br />
+<div class="row" ng-if="auth">
+	<div class="col-md-4" style="background-color: white; border: 1px solid gray;" ng-show="sorted"><br />
 		<ul ng-repeat="(key, date) in sorted" style="list-style: none;">
 			{{key}} <br><br>
 			<!-- {{date | date: 'MMMM'}} -->
@@ -35,7 +35,7 @@
 		</ul>
 	</div>
 	<div class="col-md-1"></div>
-	<div class="col-md-6">
+	<div class="col-md-6" ng-show="appointments.length">
 		<br><br>
 		<ul ng-repeat="appointment in appointments" style="background-color: white; border: 5px solid gray; box-shadow: 10px 10px 5px grey;">
 			<div class="box">{{appointment.startTime | date:'hh:mma'}}</div>
@@ -46,11 +46,11 @@
 			</table>
 			<br><br>
 		</ul>
-		<div ng-show="!appointments.length">
-      		No current requests
-    	</div>
 		<br>
 	</div>
+	<div class="col-md-12" ng-show="!appointments.length">
+		<br><br><center>No <b>confirmed</b> requests</center>
+    </div>
 	<div class="col-md-1"></div>
 </div>
 

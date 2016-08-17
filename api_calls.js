@@ -5,10 +5,9 @@ angular
 	var BASE_URL = "http://localhost:8088";
 	var apiClient = {};
 
-	apiClient.getAppointments = function(token) {
+	apiClient.getAppointments = function(token, filter) {
 		var deferred = $q.defer();
-		api_url = BASE_URL + "/appointments";
-
+		api_url = BASE_URL + "/appointments/"+filter;
 		$http({
 			method : "GET",
 			url : api_url,
@@ -70,9 +69,9 @@ angular
 		return deferred.promise;
 	}
 
-	apiClient.deleteAppointment = function(appointment) {
+	apiClient.deleteAppointment = function(id) {
 		var deferred = $q.defer();
-		api_url = BASE_URL + "/appointments/" + appointment["_id"];
+		api_url = BASE_URL + "/appointments/" + id];
 		$http({
 			method: "DELETE",
 			url : api_url,

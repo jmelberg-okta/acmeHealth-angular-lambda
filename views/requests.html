@@ -25,18 +25,33 @@
   		<ul ng-repeat="req in requests" style="background-color: white; border: 5px solid gray; box-shadow: 10px 10px 5px grey;">
   			<div class="box">{{req.startTime | date:"MMMM dd yyyy'-'hh:mma"}}</div> <br>
         <br>
-        <table style="width:80%">
+        <table style="width:80%" ng-show="tokens.idToken.claims.groups.indexOf('Providers') >= 0">
           <tr><td style="color:gray; text-transform: uppercase;">Patient Name</td> <td> <b>{{req.patient}}</b> <br></td></tr>
           <tr><td style="color:gray; text-transform: uppercase;">Reason for visit </td> <td>{{req.comment}} <br></td></tr>
           <tr><td><br><br></td></tr>
-          <tr><td><button>Suggest new time</button></td><td><button ng-click="confirmAppointment(req)">Confirm</button></td><td><button ng-click="cancelAppointment(req)">Cancel</button></td>
+          <tr align="center">
+            <td><button>Suggest new time</button></td>
+            <td><button ng-click="confirmAppointment(req)">Confirm</button></td>
+            <td><button ng-click="cancelAppointment(req)">Cancel</button></td>
+        </table>
+        <table style="width:80%" ng-show="tokens.idToken.claims.groups.indexOf('Patients') >= 0">
+          <tr><td style="color:gray; text-transform: uppercase;">Patient Name</td> <td></td><td> <b>{{req.patient}}</b> <br></td></tr>
+          <tr><td style="color:gray; text-transform: uppercase;">Reason for visit </td></td><td> <td>{{req.comment}} <br></td></tr>
+          <tr><td><br><br></td></tr>
+          <tr align="center">
+            <td aligh="center"></td>
         </table>
         <br>
+        <button ng-click="cancelAppointment(req)">Cancel</button><br>
+        {{tokens.idToken.claims.groups}}
   		</ul>
-      <div ng-show="!requests.length">
-        No current requests
-      </div>
   	</center>
+  </div>
+  <div class="col-md-12" ng-show="!requests">
+        <br><br>
+        <center>
+          No <b>current</b> requests
+        </center>
   </div>
   <div class="col-md-3"></div>
 </div>
