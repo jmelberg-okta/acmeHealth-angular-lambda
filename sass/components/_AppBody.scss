@@ -1,0 +1,5 @@
+.AppBody {
+	@include padding(xx-large small);
+	position: relative;
+	z-index: 10;
+}

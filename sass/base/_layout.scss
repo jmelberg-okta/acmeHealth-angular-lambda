@@ -1,0 +1,6 @@
+body {
+	background: get-color('lighter-gray');
+	min-height: 100vh;
+	padding-top: $header-height;
+	position: relative;
+}

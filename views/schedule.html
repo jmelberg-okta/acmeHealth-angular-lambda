@@ -1,27 +1,73 @@
-<header >
-    <nav class="navbar navbar-default  navbar-fixed-top" style="background-color:#E82D50;">
-        <div class="container-fluid">
-	        <div class="navbar-header">
-               <a href="#/" style="font-size:20px; color:white;">Schedule    |     </a>
-               <td style="padding:30px;"> <a href="#/requests" style="font-size:20px; color:white;">Requests</a>
-          	</div>
-          	<!-- Right Justified Nav -->
-          	<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-            	<ul class="nav navbar-nav navbar-right">
-              		<li> <a href="#/" style="font-size:20px; color:white;">{{tokens.idToken.claims.name}}</a></li>
-              		<li ng-if="!session"> <td style="padding:30px;"> <a href="#/login" ng-click="signout()" style="font-size:20px; color:white;">Login</a></li>
-              		<li ng-if="session"> <td style="padding:30px;"> <a href="#/login" ng-click="signout()" style="font-size:20px; color:white;">Sign Out</a></li>
-            	</ul>
-          	</div>
+<header class="AppHeader">
+    <div class="Wrap">
+      <h1 class="AppLogo">
+        <a ng-href="/#/">AcmeHealth</a>
+      </h1>
+      
+      <nav class="AppHeader-nav">
+        <ul>
+          <li class="is-active"><a ng-href="/#/">Schedule</a></li>
+          <li><a ng-href="/#/requests">Requests<span ng-if="requests.length">{{requests.length}}</span></a></li>
+        </ul>
+      </nav>
+      
+      <div class="UserMenu">
+        <div class="UserMenu-avatar">
+          <img src="{{tokens.idToken.claims.picture}}">
         </div>
-    </nav>
+        
+        <a class="UserMenu-name" ng-click="signout()">{{tokens.idToken.claims.name}}</a>
+        <a class="UserMenu-toggle" ng-click="signout()"></a>
+      </div>
+    </div>
 </header>
-<br><br>
-<div class="row" ng-if="auth">
-	<div class="col-md-4" style="background-color: white; border: 1px solid gray;" ng-show="sorted"><br />
+
+<div class="AppSidebar" >
+  	<div class="AppSidebar-widget ScheduleWidget" ng-show="sorted">
+  		<ul ng-repeat="(key, date) in sorted">
+	  		<h3 class="ScheduleWidget-title" >{{key}}</h3>
+  			<li class="ScheduleWidget-items" ng-repeat="(key, val) in date | limitTo:1" ng-click="updateAppointmentList(key)">
+  				<a>
+  					<div class="ScheduleWidget-date">{{key | date: 'dd'}} </div>
+  					<div class="ScheduleWidget-label">{{key | date: 'EEEE'}}</div>
+  					<div class="ScheduleWidget-action" ng-if="val.length > 1">{{val.length}} appointments </div>
+  					<div class="ScheduleWidget-action" ng-if="val.length == 1">{{val.length}} appointment </div>
+  				</a>
+  			</li>
+  	    </ul>
+  	</div>
+</div>
+<div class="AppBody">
+	<div class="Wrap" ng-show="appointments.length">
+		<!-- Start Appointment Card -->
+		<div class="AppointmentCard" ng-repeat="appointment in appointments">
+			<div class="AppointmentCard-time">{{appointment.startTime | date:'hh:mm a'}}</div>
+			<a class="AppointmentCard-menuToggle" href="#"></a>
+			<div class="AppointmentCard-content">
+				<div class="AppointmentCard-label">Patient Name</div>
+				<div class="AppointmentCard-description">
+					<strong>{{appointment.patient}}</strong>
+				</div>
+				<div class="AppointmentCard-label">Reason for Visit</div>
+				<div class="AppointmentCard-description">
+					<p>{{appointment.comment}}</p>
+				</div>
+			</div>
+			
+		</div>
+		<!-- End Appointment Card -->
+		</div>
+	</div>
+</div>
+<div class="AppBody">
+  	<div class="Wrap" ng-show="!appointments.length">
+		<br><br><center>No <b>confirmed</b> requests</center>
+    </div>
+</div>
+
+<!-- 
 		<ul ng-repeat="(key, date) in sorted" style="list-style: none;">
 			{{key}} <br><br>
-			<!-- {{date | date: 'MMMM'}} -->
 			<li ng-repeat="(key, val) in date | limitTo:1" ng-click="updateAppointmentList(key)">
 				<table style="width: 100%">
 					<tr>
@@ -54,35 +100,4 @@
 	<div class="col-md-1"></div>
 </div>
 
-<div ng-if="!auth">
-	<br />
-	<h3> Please <a href="#/login"> Sign in to continue</a></h3>
-</div>
-
-<style>
-  body {
-    background-color: #fafafa
-  }
-
-  .circle
-	{
-	width:50px;
-	height:50px;
-	border-radius:50%;
-	font-size:20px;
-	color:#fff;
-	line-height:50px;
-	text-align:center;
-	background:#000
-	}
-
-	.box {
-    background-color: #E82D50;
-    width: 100px;
-    text-align:center;
-    color: white;
-    border: 1px solid gray;
-    padding: 0px;
-    margin: 0px;
-}
-</style>
+ -->

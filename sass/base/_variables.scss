@@ -1,0 +1,120 @@
+//-----------------------------------------------------------------------
+// Typography
+//-----------------------------------------------------------------------
+
+$font-family: Helvetica, Arial, sans-serif;
+$font-family--alt: Helvetica, Arial, sans-serif;
+
+$font-size: (
+	'x-small': 12px,
+	'small':   14px,
+	'base':    15px,
+	'button':  15px,
+	'h6':      19px,
+	'h5':      21px,
+	'h4':      23px,
+	'h3':      25px,
+	'h2':      27px,
+	'h1':      29px
+);
+
+$font-weight: (
+	'x-small':    400,
+	'small':      400,
+	'base':       400,
+	'button':     400,
+	'h6':         400,
+	'h5':         400,
+	'h4':         400,
+	'h3':         400,
+	'h2':         400,
+	'h1':         400,
+);
+
+$line-height: (
+	'x-small': 18px,
+	'small':   21px,
+	'base':	   21px,
+	'h6':	   25px,
+	'h5':	   27px,
+	'h4':	   29px,
+	'h3':	   31px,
+	'h2':	   33px,
+	'h1':	   35px
+);
+
+
+
+//-----------------------------------------------------------------------
+// Colors
+//-----------------------------------------------------------------------
+
+// scss-lint:disable ColorVariable
+
+$colors: (
+	'default':             #2d2d2d,
+	
+	'black':               #000,
+	'white':               #fff,
+	
+	'accent':              #e82d50,
+	'accent--hover':       mix(#e82d50, #fff, 75%),
+
+	'lighter-gray':        #fffbfc,
+	'lighter-gray--hover': mix(#fffbfc, #fff, 75%),
+	
+	'light-gray':          #d8d8d8,
+	'light-gray--hover':   mix(#d8d8d8, #fff, 75%),
+	
+	'gray':                #abadac,
+	'gray--hover':         mix(#abadac, #fff, 75%),
+	
+	'dark-gray':           #5d5d5d,
+	'dark-gray--hover':    mix(#5d5d5d, #fff, 75%),
+	
+	'darker-gray':         #2d2d2d,
+	'darker-gray--hover':  mix(#2d2d2d, #fff, 75%),
+	
+	'green':               #4cbf9c,
+	'green--hover':        mix(#4cbf9c, #fff, 75%),
+	
+	'pink':                #e82d50,
+	'pink--hover':         mix(#e82d50, #fff, 75%)
+);
+
+// scss-lint:enable ColorVariable
+
+
+
+//-----------------------------------------------------------------------
+// Layout
+//-----------------------------------------------------------------------
+
+$header-height: 60px;
+$sidebar-width: 360px;
+
+$site-width:    760px;
+$grid-width:    12;
+
+$line-break:    20px;
+$gutter-width:  20px;
+
+$breakpoints: (
+	'xx-small': 320px,
+	'x-small':  480px,
+	'small':    768px,
+	'medium':   1024px,
+	'large':    1200px,
+	'x-large':  1400px,
+	'xx-large': 1600px
+);
+
+$spacing: (
+	'xx-small': 6px,
+	'x-small':  12px,
+	'small':    24px,
+	'medium':   36px,
+	'large':    48px,
+	'x-large':  60px,
+	'xx-large': 72px
+);

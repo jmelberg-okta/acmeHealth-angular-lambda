@@ -1,0 +1,26 @@
+.page-Login {
+	background: get-color('pink');
+	padding-top: 0;
+	
+	.AppBody {
+		align-items: center;
+		display: flex;
+		min-height: 100vh;
+		position: relative;
+		width: 100%;
+	
+		&,
+		a {
+			@include color('white');
+		}
+	}
+	
+	%AppLogo {
+		@include margin(large auto);
+	}
+	
+	%Wrap {
+		flex-grow: 1;
+		max-width: 360px;
+	}
+}

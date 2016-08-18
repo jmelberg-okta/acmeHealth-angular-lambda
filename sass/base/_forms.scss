@@ -1,0 +1,123 @@
+%TextInput {
+	@include color('gray');
+	@include padding('x-small');
+	@include transition(normal background, normal color);
+	background: rgba(get-color('white'), 0.9);
+	border: 0;
+	border-radius: 3px;
+	line-height: 24px;
+	width: 100%;
+	
+	&::placeholder,
+	&:focus::placeholder,
+	&:hover::placeholder {
+		@include color('gray');
+	}
+	
+	&:focus {
+		@include color('dark-gray');
+		background: get-color('white');
+	}
+}
+
+%FormField {
+	@include margin(x-small 0);
+	position: relative;
+}
+
+.FormField {
+	@extend %FormField;
+}
+
+.FormField--checkbox {
+	@extend %FormField;
+	@include font('small');
+	line-height: 16px;
+	
+	label {
+		cursor: pointer;
+		display: block;
+		position: relative;
+		
+		&:before {
+			background: rgba(get-color('white'), 0.9);
+			background-size: 12px;
+			border-radius: 2px;
+			content: '';
+			float: left;
+			height: 16px;
+			margin-right: get-spacing('x-small');
+			width: 16px;
+		}
+		
+		&:after {
+			@include transition(normal opacity);
+			background: url('../images/icon-checkmark.svg') no-repeat center;
+			background-size: 100%;
+			content: '';
+			display: block;
+			height: 12px;
+			left: 2px;
+			opacity: 0;
+			position: absolute;
+			top: 2px;
+			width: 12px;
+		}
+	}
+	
+	input[type='checkbox'] {
+		display: none;
+	}
+	
+	:checked + label:after {
+		opacity: 1;
+	}
+}
+
+.FormField--submit {
+	@extend %FormField;
+	@include font('small');
+	margin-top: get-spacing('medium');
+	text-align: center;
+	
+	%Button {
+		width: 100%;
+	}
+	
+	p {
+		display: flex;
+		width: 100%;
+		
+		> * {
+			flex-grow: 1;
+			margin: 0 get-spacing('xx-small');
+			
+			&:first-child {
+				margin-left: 0;
+			}
+			
+			&:last-child {
+				margin-right: 0;
+			}
+		}
+	}
+	
+	a {
+		@extend %animated-Underline;
+	}
+	
+	ul {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		
+		li {
+			display: inline;
+			
+			+ li:before {
+				content: '|';
+				margin: 0 0.5em;
+			}
+		}
+	}
+}

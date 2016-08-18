@@ -1,0 +1,41 @@
+{
+  "name": "fabric",
+  "version": "1.1.0",
+  "description": "Fabric is the base framework used with Flickerbox, Inc. websites.",
+  "main": "gulpfile.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/flickerbox/fabric.git"
+  },
+  "author": "Flickerbox, Inc.",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/flickerbox/fabric/issues"
+  },
+  "homepage": "https://github.com/flickerbox/fabric",
+  "dependencies": {
+  },
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-autoprefixer": "^2.1.0",
+    "gulp-clean": "^0.3.2",
+    "gulp-concat": "^2.6.0",
+    "gulp-css-globbing": "^0.1.8",
+    "gulp-livereload": "^3.8.1",
+    "gulp-load-plugins": "^1.2.0",
+    "gulp-notify": "^2.2.0",
+    "gulp-plumber": "^1.1.0",
+    "gulp-rename": "^1.2.2",
+    "gulp-sass": "^2.1.0",
+    "gulp-scss-lint": "^0.3.9",
+    "gulp-shell": "^0.5.2",
+    "gulp-sourcemaps": "^1.5.1",
+    "gulp-uglify": "^1.5.3",
+    "gulp-update": "0.0.2",
+    "gulp-util": "^3.0.7",
+    "gulp-watch": "^4.3.5"
+  }
+}

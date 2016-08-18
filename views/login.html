@@ -1,17 +1,27 @@
-<center>
-  <div ng-if="!auth">
-    <div><br><br><br></div>
-      <img src="img/acmelogo.png"></img>
-      <br><br>
-      <form style="width: 25%;">
-          <input type="text" style="border:none;" class="form-control" placeholder="Username" ng-model="user.email" /><br>
-          <input type="password" style="border:none;" class="form-control" placeholder="Password" ng-model="user.password" /><br>
-        <br />
-        <input class="btn btn-primary btn-lg" type="submit" ng-click="authenticate(user)" style="background-color: white; color:#E82D50; border:none;" value="Sign In" />
-      </form>
+<div class="AppBody">
+  <div class="Wrap">
+    <h1 class="AppLogo--stacked"></h1>
+      
+    <form id="LoginForm">
+      <div class="FormField">
+        <input type="text" placeholder="Username" ng-model="user.email">
+      </div>
+      <div class="FormField">
+        <input type="password" placeholder="Password" ng-model="user.password">
+      </div>
+      <div class="FormField--checkbox">
+        <input type="checkbox" name="remember_me" id="remember_me">
+        <label for="remember_me">Remember me</label>
+      </div>
+      
+      <div class="FormField--submit">
+        <p>
+          <button class="Button--large Button--white" ng-click="authenticate(user)">Sign in</button>
+        </p>
+        <ul>
+          <li><a href="#">Need Help?</a></li>
+        </ul>
+      </div>
+    </form>
   </div>
-</center>
-
-<style>
-  body {  background-color: #E82D50; }
-</style>
+</div>

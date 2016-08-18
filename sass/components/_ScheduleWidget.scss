@@ -1,0 +1,106 @@
+.ScheduleWidget {
+	&-title {
+		@include font('small');
+		@include color('gray');
+		@include margin(medium 0);
+		font-weight: 600;
+		text-transform: uppercase;
+	}
+	
+	&-items {
+		@include padding(small 0);
+		border-left: 1px solid get-color('gray');
+		list-style: none;
+		margin: 0 0 0 24px;
+		position: relative;
+		
+		&:after,
+		&:before {
+			background: get-color('light-gray');
+			border-radius: 100%;
+			content: '';
+			display: block;
+			height: 7px;
+			left: -4px;
+			position: absolute;
+			width: 7px;
+		}
+		
+		&:after {
+			bottom: 0;
+		}
+		
+		&:before {
+			top: 0;
+		}
+		
+		li {
+			@include margin(large 0);
+		}
+		
+		a {
+			@include color('gray');
+			
+			&:active,
+			&:hover {
+				text-decoration: none;
+			}
+		}
+		
+		li,
+		a {
+			align-items: center;
+			display: flex;
+			width: 100%;
+		}
+	}
+	
+	&-date {
+		@include font('h6');
+		@include color('white');
+		@include transition(normal background, normal box-shadow);
+		background: get-color('gray');
+		border-radius: 100%;
+		font-weight: 600;
+		height: 49px;
+		line-height: 49px;
+		margin-left: -25px;
+		margin-right: get-spacing('x-small');
+		text-align: center;
+		width: 49px;
+	}
+	
+	&-label {
+		@include font('small');
+		@include transition(normal color);
+		flex-grow: 1;
+		font-weight: 600;
+	}
+	
+	&-action {
+		@include font('x-small');
+		@include transition(normal color);
+	}
+	
+	a:active &-date,
+	a:hover &-date {
+		background: get-color('dark-gray');
+	}
+	
+	a:active &-action,
+	a:hover &-action,
+	a:active &-label,
+	a:hover &-label {
+		@include color('dark-gray');
+	}
+	
+	.is-active &-date {
+		background: get-color('default');
+		box-shadow: rgba(get-color('black'), 0.3) 0 0 get-spacing('small');
+	}
+	
+	.is-active &-action,
+	.is-active &-label {
+		@include color('default');
+	}
+}

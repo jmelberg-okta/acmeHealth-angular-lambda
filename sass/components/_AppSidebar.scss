@@ -1,0 +1,16 @@
+.AppSidebar {
+	@include padding(xx-large small);
+	background: get-color('white');
+	border-right: 1px solid rgba(get-color('gray'), 0.3);
+	bottom: 0;
+	left: 0;
+	overflow: auto;
+	position: fixed;
+	top: $header-height;
+	width: $sidebar-width;
+	z-index: 20;
+	
+	&-widget {
+		@include margin(medium 0);
+	}
+}

@@ -1,0 +1,53 @@
+%Button {
+	@include color('default');
+	@include font-size('button');
+	@include font-weight('button');
+	@include padding(0 small);
+	@include transition(normal background, normal border, normal color);
+	border: 2px solid transparent;
+	cursor: pointer;
+	display: inline-block;
+	height: 34px;
+	line-height: 30px;
+	outline: none;
+	text-align: center;
+	text-decoration: none;
+	white-space: nowrap;
+	
+	> a {
+		color: inherit;
+	}
+
+	&:active,
+	&:hover {
+		@include color('default');
+		text-decoration: none;
+	}
+}
+
+.Button,
+[class^='Button--'], 
+[class*=' Button--'] {
+	@extend %Button;
+	background: get-color('accent');
+	color: get-color('white');
+
+	&:active,
+	&:hover {
+		background-color: get-color('accent--hover');
+		color: get-color('white');
+	}
+}
+
+.Button--outline {
+	background: transparent;
+	border-color: get-color('accent');
+	color: get-color('accent');
+
+	&:active,
+	&:hover {
+		background-color: transparent;
+		border-color: get-color('accent--hover');
+		color: get-color('accent--hover');
+	}
+}

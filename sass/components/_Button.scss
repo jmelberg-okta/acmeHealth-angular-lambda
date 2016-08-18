@@ -1,0 +1,105 @@
+%Button {
+	border-radius: 20px;
+	border-width: 1px;
+	height: 40px;
+	line-height: 38px;
+	
+	&:after {
+		@include transition(normal opacity);
+		content: '';
+		opacity: 0;
+		position: absolute;
+		transition-delay: get-transition-speed('fast');
+	}
+}
+
+.Button--loading {
+	&:after {
+		display: block;
+		height: 32px;
+		left: 50%;
+		opacity: 1;
+		top: 50%;
+		transform: translate(-50%, -50%);
+		width: 32px;
+	}
+}
+
+.Button--large {
+	border-radius: 30px;
+	height: 60px;
+	line-height: 58px;
+	
+	&.Button--loading {
+		&:after {
+			top: 30px;
+		}
+	}
+}
+
+.Button--white {
+	@include color('accent');
+	background: get-color('white');
+	
+	&:active,
+	&:hover {
+		@include color('accent');
+		background: get-color('white');
+	}
+
+	&.Button--loading {
+		@include color('white');
+		
+		&:after {
+			background: url('../images/icon-loading.gif');
+		}
+	}
+}
+
+.Button--gray {
+	@include color('white');
+	background: get-color('gray');
+	
+	&:active,
+	&:hover {
+		@include color('white');
+		background: get-color('gray--hover');
+	}
+}
+
+.Button--grayOutline {
+	@include color('gray');
+	background: transparent;
+	border-color: get-color('gray');
+	
+	&:active,
+	&:hover {
+		@include color('gray--hover');
+		background: transparent;
+		border-color: get-color('gray--hover');
+	}
+}
+
+.Button--green {
+	@include color('white');
+	background: get-color('green');
+	
+	&:active,
+	&:hover {
+		@include color('white');
+		background: get-color('green--hover');
+	}
+}
+
+.Button--greenOutline {
+	@include color('green');
+	background: transparent;
+	border-color: get-color('green');
+	
+	&:active,
+	&:hover {
+		@include color('green--hover');
+		background: transparent;
+		border-color: get-color('green--hover');
+	}
+}

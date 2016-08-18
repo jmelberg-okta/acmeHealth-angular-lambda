@@ -71,7 +71,7 @@ angular
 
 	apiClient.deleteAppointment = function(id) {
 		var deferred = $q.defer();
-		api_url = BASE_URL + "/appointments/" + id];
+		api_url = BASE_URL + "/appointments/" +id;
 		$http({
 			method: "DELETE",
 			url : api_url,

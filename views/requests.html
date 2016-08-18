@@ -1,86 +1,65 @@
-<header >
-    <nav class="navbar navbar-default  navbar-fixed-top" style="background-color:#E82D50;">
-        <div class="container-fluid">
-          <div class="navbar-header">
-               <a href="#/" style="font-size:20px; color:white;">Schedule    |     </a>
-               <td style="padding:30px;"> <a href="#/requests" style="font-size:20px; color:white;">Requests</a>
-            </div>
-          	<!-- Right Justified Nav -->
-          	<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-            	<ul class="nav navbar-nav navbar-right">
-              		<li> <a href="#/" style="font-size:20px; color:white;">{{tokens.idToken.claims.name}}</a></li>
-              		<li ng-if="!session"> <td style="padding:30px;"> <a href="#/login" ng-click="signout()" style="font-size:20px; color:white;">Login</a></li>
-              		<li ng-if="session"> <td style="padding:30px;"> <a href="#/login" ng-click="signout()" style="font-size:20px; color:white;">Sign Out</a></li>
-            	</ul>
-          	</div>
+<header class="AppHeader">
+    <div class="Wrap">
+      <h1 class="AppLogo">
+        <a ng-href="/#/">AcmeHealth</a>
+      </h1>
+      
+      <nav class="AppHeader-nav">
+        <ul>
+          <li><a ng-href="/#/">Schedule</a></li>
+          <li class="is-active"><a ng-href="/#/requests">Requests<span ng-if="requests.length">{{requests.length}}</span></a></li>
+        </ul>
+      </nav>
+      
+      <div class="UserMenu">
+        <div class="UserMenu-avatar">
+          <img src="{{tokens.idToken.claims.picture}}">
         </div>
-    </nav>
-</header>
-<br><br>
-<div class="row">
-  <div class="col-md-3"></div>
-  <div class="col-md-6" ng-if="requests">
-  	<center>
-  		<br><br>
-  		<ul ng-repeat="req in requests" style="background-color: white; border: 5px solid gray; box-shadow: 10px 10px 5px grey;">
-  			<div class="box">{{req.startTime | date:"MMMM dd yyyy'-'hh:mma"}}</div> <br>
-        <br>
-        <table style="width:80%" ng-show="tokens.idToken.claims.groups.indexOf('Providers') >= 0">
-          <tr><td style="color:gray; text-transform: uppercase;">Patient Name</td> <td> <b>{{req.patient}}</b> <br></td></tr>
-          <tr><td style="color:gray; text-transform: uppercase;">Reason for visit </td> <td>{{req.comment}} <br></td></tr>
-          <tr><td><br><br></td></tr>
-          <tr align="center">
-            <td><button>Suggest new time</button></td>
-            <td><button ng-click="confirmAppointment(req)">Confirm</button></td>
-            <td><button ng-click="cancelAppointment(req)">Cancel</button></td>
-        </table>
-        <table style="width:80%" ng-show="tokens.idToken.claims.groups.indexOf('Patients') >= 0">
-          <tr><td style="color:gray; text-transform: uppercase;">Patient Name</td> <td></td><td> <b>{{req.patient}}</b> <br></td></tr>
-          <tr><td style="color:gray; text-transform: uppercase;">Reason for visit </td></td><td> <td>{{req.comment}} <br></td></tr>
-          <tr><td><br><br></td></tr>
-          <tr align="center">
-            <td aligh="center"></td>
-        </table>
-        <br>
-        <button ng-click="cancelAppointment(req)">Cancel</button><br>
-        {{tokens.idToken.claims.groups}}
-  		</ul>
-  	</center>
+        
+        <a class="UserMenu-name" ng-click="signout()">{{tokens.idToken.claims.name}}</a>
+        <a class="UserMenu-toggle" ng-click="signout()"></a>
+      </div>
+      
+    </div>
+  </header>
+
+<div class="AppBody">
+  <div class="Wrap" ng-if="requests">
+    <div class="AppointmentCard has-indicator" ng-repeat="req in requests">
+      <div class="AppointmentCard-time">{{req.startTime | date:"MMMM dd, yyyy' - 'hh:mm a"}}</div>
+        <a class="AppointmentCard-menuToggle"></a>
+        <div class="AppointmentCard-content">
+          <div class="AppointmentCard-label">Patient Name</div>
+          <div class="AppointmentCard-description">
+            <strong>{{req.patient}}</strong>
+          </div>
+          
+          <div class="AppointmentCard-label">Reason for Visit</div>
+          <div class="AppointmentCard-description">
+            <p>{{req.comment}}</p>
+          </div>
+        
+        </div>
+
+        <!-- // Provider view -->
+        <div class="AppointmentCard-actions" ng-show="tokens.idToken.claims.groups.indexOf('Providers') >= 0 && tokens.idToken.claims.groups.indexOf('Providers-read-only') < 0">
+          <a class="Button--greenOutline" href="#">Suggest new time</a>
+          <a class="Button--green" ng-click="confirmAppointment(req)">Confirm</a>
+          <a class="Button--gray" ng-click="cancelAppointment(req)">Cancel</a>
+        </div>
+
+        <!-- // Patient view -->
+        <div class="AppointmentCard-actions" ng-show="tokens.idToken.claims.groups.indexOf('Patients') >= 0">
+          <a class="Button--gray" ng-click="cancelAppointment(req)">Cancel</a>
+        </div>
+
+        <!-- // Read-only view -->
+        <div class="AppointmentCard-actions" ng-show="tokens.idToken.claims.groups.indexOf('Providers-read-only') >= 0">
+        </div>
+      </div>
+    </div>
   </div>
-  <div class="col-md-12" ng-show="!requests">
-        <br><br>
-        <center>
-          No <b>current</b> requests
-        </center>
+  <div class="Wrap" ng-if="!requests">
+    <center> No <b>current</b> requests. </center>
   </div>
-  <div class="col-md-3"></div>
 </div>
-
-
-
-
-<style>
-  body {
-    background-color: #fafafa
-  }
-
-  .box {
-    background-color: #E82D50;
-    width: 200px;
-    text-align:left;
-    color: white;
-    border: 1px solid gray;
-    padding: 0px;
-    margin: 0px;
-  }
-
-  .centerDiv {
-    position: absolute;
-    top: 20%;
-    left: 20%;
-    margin-top: -50px;
-    margin-left: -50px;
-    width: 500px;
-    height: 500px;
-  }
-</style>

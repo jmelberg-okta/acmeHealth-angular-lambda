@@ -1,0 +1,77 @@
+.AppHeader {
+	align-items: stretch;
+	background: get-color('pink');
+	box-shadow: rgba(get-color('gray'), 0.3) 0 0 0 2px;
+	display: flex;
+	height: $header-height;
+	left: 0;
+	position: fixed;
+	right: 0;
+	top: 0;
+	z-index: 30;
+	
+	&,
+	a {
+		@include color('white');
+	}
+	
+	%Wrap {
+		align-items: center;
+		display: flex;
+		justify-content: space-between;
+		max-width: inherit;
+		
+		&:after {
+			display: none;
+		}
+	}
+	
+	%AppLogo {
+		margin: 0;
+	}
+	
+	&-nav {
+		ul {
+			display: flex;
+			list-style: none;
+			margin: 0;
+			padding: 0;
+		}
+		
+		li + li {
+			margin-left: get-spacing('x-small');
+		}
+		
+		a {
+			@include font('small');
+			@include padding(0 small);
+			@include transition(normal border);
+			border-bottom: 2px solid transparent;
+			display: block;
+			height: 60px;
+			line-height: 58px;
+			position: relative;
+		}
+		
+		a:active,
+		a:hover,
+		.is-active a {
+			border-color: get-color('white');
+			text-decoration: none;
+		}
+		
+		span {
+			@include color('pink');
+			background: get-color('white');
+			border-radius: 100%;
+			display: inline-block;
+			font-size: 11px;
+			height: 15px;
+			line-height: 15px;
+			margin-right: -15px;
+			text-align: center;
+			transform: translateY(-0.9em);
+			width: 15px;
+		}
+	}
+}
