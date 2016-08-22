@@ -2,6 +2,7 @@ angular
 .module("ApiClient", [])
 .factory("apiClient", function($q, $http, $timeout) {
 
+	// Endpoint for resource server
 	var BASE_URL = "http://localhost:8088";
 	var apiClient = {};
 
@@ -69,13 +70,17 @@ angular
 		return deferred.promise;
 	}
 
-	apiClient.deleteAppointment = function(id) {
+	apiClient.deleteAppointment = function(appointment, token) {
 		var deferred = $q.defer();
-		api_url = BASE_URL + "/appointments/" +id;
+		api_url = BASE_URL + "/appointments/" +appointment["_id"];
 		$http({
 			method: "DELETE",
 			url : api_url,
-			headers : {"Content-Type" : "application/json"}
+			data : appointment,
+			headers : {
+				"Content-Type" : "application/json",
+				Authorization : "Bearer " + token
+			}
 		})
 		.then(function(res) {
 			if (res.data.Error) {
@@ -99,7 +104,6 @@ angular
 			else{ deferred.resolve(res); }
 		}, function(err) {deferred.reject(err)});
 		return deferred.promise;
-
 	}
 
 	return apiClient;

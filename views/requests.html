@@ -42,7 +42,7 @@
         </div>
 
         <!-- // Provider view -->
-        <div class="AppointmentCard-actions" ng-show="tokens.idToken.claims.groups.indexOf('Providers') >= 0 && tokens.idToken.claims.groups.indexOf('Providers-read-only') < 0">
+        <div class="AppointmentCard-actions" ng-show="tokens.idToken.claims.groups.indexOf('Providers') >= 0">
           <a class="Button--greenOutline" href="#">Suggest new time</a>
           <a class="Button--green" ng-click="confirmAppointment(req)">Confirm</a>
           <a class="Button--gray" ng-click="cancelAppointment(req)">Cancel</a>
@@ -50,7 +50,7 @@
 
         <!-- // Patient view -->
         <div class="AppointmentCard-actions" ng-show="tokens.idToken.claims.groups.indexOf('Patients') >= 0">
-          <a class="Button--gray" ng-click="cancelAppointment(req)">Cancel</a>
+          <a class="Button--gray" ng-click="deleteAppointment(req)">Cancel</a>
         </div>
 
         <!-- // Read-only view -->

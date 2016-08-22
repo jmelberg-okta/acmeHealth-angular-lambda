@@ -44,21 +44,22 @@ app.value("clientScopes", undefined);
 
 app.run(function(authClient){
 	oktaClient = authClient.create({
-		baseUrl: "https://jordandemo.oktapreview.com",
+		baseUrl: "https://jordandemo.oktapreview.com/",
 		id: "Jw1nyzbsNihSuOETY3R1",
 		redirect: "http://localhost:8080"
 	});
 	oktaAuth = authClient;
+
+	// Id Token Scopes
 	clientScopes = [
 		'openid',
 		'email',
 		'profile',
-		'groups',
-		'appointments:read',
-		'appointments:write'
+		'groups'
 		];
 });
 
+// Formats date object into form MM/DD/YYYY
 var toJsonDate = function(item) {
 	var itemDate = item.startTime.split('T')[0].split('-');
 	var month = itemDate[1];
@@ -67,6 +68,7 @@ var toJsonDate = function(item) {
 	return month+"/"+day+"/"+year
 }
 
+//Returns next appointment
 var getFirstAppointment = function(json) {
 	for(var month in json) {
 		if(json.hasOwnProperty(month)) {
@@ -78,6 +80,7 @@ var getFirstAppointment = function(json) {
 	}
 }
 
+// Filter appointments by date and sorted by time
 var filterAppointments = function(appointmentData, date) {
 	// Date format : MM/DD/YYYY
 	var dailyAppointments = [];
@@ -90,7 +93,7 @@ var filterAppointments = function(appointmentData, date) {
 	return dailyAppointments;
 }
 
-
+// Route: '/'
 app.controller("ScheduleController",
 	function($scope, $window, $location, $timeout, $route, $rootScope, $anchorScroll, $http, authClient, apiClient) {
 		$rootScope.layout = "page-Schedule has-sidebar";
@@ -103,10 +106,9 @@ app.controller("ScheduleController",
 		}
 		
 		var tokens = !angular.isUndefined($window.localStorage["tokens"]) ? JSON.parse($window.localStorage["tokens"]) : undefined;
+		$scope.tokens = tokens
 		var id = tokens.idToken.claims.sub;
 		var accessToken = tokens.accessToken.accessToken;
-		console.log(tokens.idToken);		
-
 		apiClient.getAppointments(accessToken, id)
 		.then(function(appointments) {
 			var appointmentJSON = JSON.parse(appointments).data;
@@ -143,7 +145,6 @@ app.controller("ScheduleController",
 					"April", "May", "June", "July", "August",
 					"September", "October", "November", "December"
 				];
-				console.log(item.startTime.split('T')[0]);
 				var jsonDate = toJsonDate(item);
 				var date = item.startTime.split('T')[0].split('-');
 				var month = jsonDate.split('/')[0];
@@ -173,7 +174,7 @@ app.controller("ScheduleController",
 		$scope.session = session;
 		$scope.tokens = tokens;
 		if(angular.isUndefined(completed)){
-			refresh(100);
+			refresh(1000);
 		}
 		$scope.appointments = appointments != "[]" ? appointments : undefined;
 		$scope.sorted = appointments != "[]" ? sorted : undefined;
@@ -182,24 +183,18 @@ app.controller("ScheduleController",
 			$scope.appointments = filterAppointments(confirmedAppointments, date);
 		}
 
-	  	/**
-		 *	Refreshes the current page given time duration until refresh
-	  	 */
+	  	/**	Refreshes the current page given time duration until refresh */
 		function refresh(duration){
 			setTimeout(function() {$route.reload();}, duration);
 		}
 
-		/**
-		 *	Clears the localStorage saved in the web browser and scope variables
-		 */
+		/**	Clears the localStorage saved in the web browser and scope variables */
 		function clearStorage(){
 			$window.localStorage.clear();
 			$scope = $scope.$new(true);
 		}
 
-		/**
-		 *	Signout method called via button selection
-		 */
+		/**	Signout method called via button selection */
 		$scope.signout = function() {
 			$timeout(function() {
 				oktaAuth.signout()
@@ -212,8 +207,10 @@ app.controller("ScheduleController",
 				});
 			}, 100);
 		}
+
 });
 
+// Route '/requests'
 app.controller("RequestsController",
 	function($scope, $window, $route, $location, $timeout, $rootScope, authClient, apiClient) {
 		$rootScope.layout = "page-Requests";
@@ -225,16 +222,7 @@ app.controller("RequestsController",
 		var accessToken = tokens.accessToken.accessToken;
 		var complete = undefined;
 
-		var renewIdToken = authClient.renewIdToken(clientScopes);
-		renewIdToken.then(function(newToken) {
-			$window.localStorage["tokens"] = angular.toJson({
-				"idToken" : newToken["idToken"],
-				"accessToken" : tokens.accessToken
-			});
-			tokens = !angular.isUndefined($window.localStorage["tokens"]) ? JSON.parse($window.localStorage["tokens"]) : undefined;
-			}, function(err) { console.error(err); }
-		);
-
+		// Get all appointments with 'Requested' status
 		apiClient.getAppointments(accessToken, id)
 		.then(function(appointments) {
 			var appointmentJSON = JSON.parse(appointments).data;
@@ -259,14 +247,12 @@ app.controller("RequestsController",
 
 		var pending = $window.localStorage["pendingAppointments"];
 		var req = !angular.isUndefined(pending) ? JSON.parse(pending) : undefined;
-		// Update scope
 		
 		if(!angular.isUndefined(pending) || pending === null){
 			$scope.requests = JSON.parse(pending);
 			complete = true;
 		} 
 
-		// $scope.requests = !angular.isUndefined(pending) ? JSON.parse(pending) : undefined;
 		$scope.tokens = tokens;
 		$scope.auth = !angular.isUndefined(auth) ? JSON.parse(auth) : undefined;
 		$scope.session = session;
@@ -275,6 +261,7 @@ app.controller("RequestsController",
 			refresh(100);
 		}
 
+		// Cancel Appointment (Provider ONLY)
 		$scope.cancelAppointment = function(appointment) {
 			var cancel = apiClient.cancelAppointment(appointment, accessToken);
 			cancel.then(function(res) {
@@ -286,6 +273,19 @@ app.controller("RequestsController",
 			});
 		}
 
+		// Delete Appointment (Patient ONLY)
+		$scope.deleteAppointment = function(appointment) {
+			var deleteAppt = apiClient.deleteAppointment(appointment, accessToken);
+			deleteAppt.then(function(res) {
+				$timeout(function(){
+					$route.reload();
+				}, 1000);
+			}, function(error) {
+				console.error(error);
+			});
+		}
+
+		// Confirm Appointment (Provider ONLY)
 		$scope.confirmAppointment = function(appointment) {
 			var confirm = apiClient.confirmAppointment(appointment, accessToken);
 			confirm.then(function(res) {
@@ -297,24 +297,18 @@ app.controller("RequestsController",
 			});
 		}
 
-		/**
-		 *	Refreshes the current page given time duration until refresh
-	  	 */
+		/**	Refreshes the current page given time duration until refresh */
 		function refresh(duration){
 			setTimeout(function() {$route.reload();}, duration);
 		}
 
-		/**
-		 *	Clears the localStorage saved in the web browser and scope variables
-		 */
+		/**	Clears the localStorage saved in the web browser and scope variables */
 		function clearStorage(){
 			$window.localStorage.clear();
 			$scope = $scope.$new(true);
 		}
 
-		/**
-		 *	Signout method called via button selection
-		 */
+		/**	Signout method called via button selection */
 		$scope.signout = function() {
 			$timeout(function() {
 				oktaAuth.signout()
@@ -336,45 +330,52 @@ app.controller("RequestsController",
  */
 app.controller("LoginController",
 	function($scope, $window, $location, $timeout, $rootScope, authClient, apiClient){
+		
+		// Uncomment when real deal
+
 		// if(!angular.isUndefined($window.localStorage["session"])){
 		// 	$location.url("/");
 		// }
 		$rootScope.layout = 'page-Login';
+		
 		$scope.authenticate = function(user) {
-
 			var res = authClient.login(user.email, user.password);
 			res.then(function(res){
 				
 				// update storage
 				$window.localStorage["auth"] = res.auth;
 				$window.localStorage["session"] = res.session;
-				console.log('authenticated');
 
 				var options = {
 					'token' : res.sessionToken,
-					'responseType' : ['id_token', 'token'], // Requires list for multiple inputs
+					'responseType' : 'id_token', 
 					'scopes' : clientScopes
 				};
 
-				var tokens = authClient.getTokens(options);
-				tokens.then(function(result) {
-					var renewIdToken = authClient.renewIdToken(clientScopes);
-					renewIdToken.then(function(newToken) {
+				// Get idToken and accessToken
+				var tokens = authClient.getIdToken(options);
+				tokens.then(function(idTokenResult) {
+					tokenOptions = {
+						url : 'https://jordandemo.oktapreview.com/',
+						authUrl : '/oauth2/aus7xbiefo72YS2QW0h7/v1/authorize',
+						responseType : 'token',
+						id: 'Jw1nyzbsNihSuOETY3R1',
+						redirect : 'http://localhost:8080/',
+						scopes: ['appointments:read', 'appointments:cancel', 'appointments:edit', 'appointments:confirm']
+					}
+					authClient.getAccessToken(tokenOptions).then(function(result){
+						console.log("Retrieved both tokens\n", result, "\n", idTokenResult);
 						$window.localStorage["tokens"] = angular.toJson({
-						"idToken" : newToken["idToken"],
-						"accessToken" : result["accessToken"]
+							"idToken" : idTokenResult,
+							"accessToken" : result
 						});
 						$location.url('/');
-						}, function(err) { console.error(err); }
-					);
-					
-				}, function(error) {console.log(error)});
-
+					}, function(error) { console.error(error); });
+				}, function(err) { console.error(err); });		
 			}, function(err) {console.error(err)});
-
-			
-			
 		};
 });
+
+
 
 

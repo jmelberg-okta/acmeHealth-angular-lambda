@@ -61,43 +61,7 @@
 </div>
 <div class="AppBody">
   	<div class="Wrap" ng-show="!appointments.length">
-		<br><br><center>No <b>confirmed</b> requests</center>
+		<br><br><center>No <b>confirmed</b> requests
+		{{tokens.accessToken | json}}</center>
     </div>
 </div>
-
-<!-- 
-		<ul ng-repeat="(key, date) in sorted" style="list-style: none;">
-			{{key}} <br><br>
-			<li ng-repeat="(key, val) in date | limitTo:1" ng-click="updateAppointmentList(key)">
-				<table style="width: 100%">
-					<tr>
-						<td><div class="circle"> {{key | date: 'dd'}}</div></td>
-						<td> {{key | date: 'EEEE'}} </td>
-						<td ng-if="val.length > 1"> {{val.length}} Appointments </td>
-						<td ng-if="val.length == 1"> {{val.length}} Appointment </td>
-					</tr>
-				</table>
-			</li>
-		</ul>
-	</div>
-	<div class="col-md-1"></div>
-	<div class="col-md-6" ng-show="appointments.length">
-		<br><br>
-		<ul ng-repeat="appointment in appointments" style="background-color: white; border: 5px solid gray; box-shadow: 10px 10px 5px grey;">
-			<div class="box">{{appointment.startTime | date:'hh:mma'}}</div>
-			<br>
-			<table style="width:100%">
-				<tr><td style="color:gray; text-transform: uppercase;">Patient Name</td> <td> <b>{{appointment.patient}}</b> <br></td></tr>
-				<tr><td style="color:gray; text-transform: uppercase;">Reason for visit </td> <td>{{appointment.comment}} <br></td></tr>
-			</table>
-			<br><br>
-		</ul>
-		<br>
-	</div>
-	<div class="col-md-12" ng-show="!appointments.length">
-		<br><br><center>No <b>confirmed</b> requests</center>
-    </div>
-	<div class="col-md-1"></div>
-</div>
-
- -->

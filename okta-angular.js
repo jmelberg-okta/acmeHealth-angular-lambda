@@ -22,18 +22,14 @@
  * 		Inject "OktaAuthClient" into your modules,
  *		followed by "authClient" in your controllers, directives,
  *		etc. if using a custom login form
- *
- *		Inject "widgetClient" in your controllers, directives,
- *		etc if using the sign-in widget
  */
 
 angular
 .module("OktaAuthClient", [])
-.factory("authClient", function($q, $timeout) {
+.factory("authClient", function($q, $timeout, $http) {
 	var auth;
-	/**
-	 *	Creates the Okta Authentication binding
-	 */
+
+	/**	Creates the Okta Authentication binding */
 	var create = function(options) {
 		auth = new OktaAuth({
 			url: options.baseUrl,
@@ -81,8 +77,7 @@ angular
 	 *	Given a sessionToken, returns "idToken" and/or "accessToken",
 	 *	and user "clams"
 	 */
-	var getTokens = function(options) {
-		console.log(options);
+	var getIdToken = function(options) {
 		var deferred = $q.defer();
 		if(auth.session.exists()){
 			auth.token.getWithoutPrompt({
@@ -90,17 +85,7 @@ angular
 				responseType : options.responseType,
 				scopes : options.scopes
 			}).then(function(res) {
-				var tokens = {};
-				if(angular.isArray(res)){
-					angular.forEach(res, function(val) {
-						if("accessToken" in val){ 	tokens["accessToken"] = val;	}
-						if ("idToken" in val){	tokens["idToken"] = val; 	}
-					});
-				} else {
-					if (res.hasOwnProperty("accessToken")){ tokens["accessToken"] = res; }
-					if (res.hasOwnProperty("idToken")){ tokens["idToken"] = res; }
-				}
-				deferred.resolve(tokens);
+				deferred.resolve(res);
 			});
 		} else {
 			console.log("No session");
@@ -108,9 +93,28 @@ angular
 		return deferred.promise;
 	}
 
-	/**
-	 *	Refreshes the current session
-	 */
+	/** Retrieves accessToken creating new authJS object */
+	var getAccessToken = function(options) {
+		var tokenAuth = new OktaAuth({
+			url: options.url,
+			clientId : options.id,
+			redirectUri: options.redirect,
+			authorizationUrl : options.authUrl
+		});
+		var deferred = $q.defer();
+		var accessToken = tokenAuth.token.getWithoutPrompt({
+			responseType : options.responseType,
+			scopes : options.scopes
+		});
+		accessToken.then(function(res) {
+			deferred.resolve(res);
+		}, function(error) {
+			deferred.reject(error);
+		});
+		return deferred.promise;
+	}
+
+	/**	Refreshes the current session */
 	var refreshSession = function() {
 		var deferred = $q.defer();
 		auth.session.exists()
@@ -126,9 +130,7 @@ angular
 		return deferred.promise;
 	}
 
-	/**
-	 * 	Closes the current session
-	 */
+	/** 	Closes the current session  */
 	var closeSession = function() {
 		var deferred = $q.defer();
 		auth.session.close()
@@ -139,9 +141,7 @@ angular
 		return deferred.promise;
 	}
 
-	/**
-	 *	Renews the current ID token
-	 */
+	/**	Renews the current ID token */
 	var renewIdToken = function(options) {
 		var scopes = {'scopes' : options};
 		var deferred = $q.defer();
@@ -170,16 +170,12 @@ angular
 		return deferred.promise;
 	}
 
-	/**
-	 *	Logs the user out of the current session
-	 */
+	/**	Logs the user out of the current session */
 	var signout = function() {
 		var deferred = $q.defer();
 		auth.session.exists()
 		.then(function(exists){
-			if(exists) {
-				auth.signOut();
-			}
+			if(exists) {	auth.signOut();	}
 			deferred.resolve("Signed out");
 		})
 		.fail(function(err){
@@ -194,145 +190,12 @@ angular
 	return {
 		create : create, 
 		login : login,
-		getTokens : getTokens,
+		getIdToken : getIdToken,
+		getAccessToken : getAccessToken,
 		refreshSession : refreshSession,
 		closeSession : closeSession,
 		renewIdToken : renewIdToken,
 		decodeIdToken : decodeIdToken,
-		signout : signout
-	}
-})
-
-/********************************************************/
-/********************************************************/
-
-/********************************************************/
-/********************************************************/
-
-/**
- *	Wrapper for Sign-In Widget
- */	
-.factory("widgetClient", function($q) {
-	var auth;
-
-	/**
-	 *	Creates the Okta Authentication binding
-	 */
-	var create = function(options) {
-		auth = new OktaSignIn({
-			baseUrl : options.baseUrl,
-			clientId : options.clientId,
-			redirectUri : options.redirectUri,
-			authScheme : options.authScheme,
-			authParams : options.authParams
-		});
-		return auth;
-	};
-
-	/**
-	 *	Checks for existing session if not present, it
-	 *	uses the Okta Widget AuthSDK to load the
-	 *	Okta Sign-In Widget	
-	 */
-	var existingSession = function() {
-		var deferred = $q.defer();
-		auth.session.exists(function(exists){
-			if(exists) {
-				// Active session
-				deferred.resolve(true);
-			} else {
-				// No active session found
-				deferred.reject();
-			}
-		});
-		return deferred.promise;
-	} 
-		
-	/**
-	 *	Launches the sign in widget
-	 */
-	 var launchWidget = function() {
-	 	var deferred = $q.defer();
-	 	auth.renderEl(
-	        { el: "#okta-login-container" },
-	        function(res){
-	           	 if (res.status === "SUCCESS") {
-	           	 	deferred.resolve({
-	           	 		"auth" : res,
-	           	 		"session" : true
-	           	 	});
-	            } else {
-	            	deferred.reject(res);
-	            }
-	        }
-		);
-		return deferred.promise;
-	 }
-
-
-	/**
-	 *	Refreshes the current session
-	 */
-	var refreshSession = function() {
-		var deferred = $q.defer();
-		auth.session.refresh(function(res) {
-			if(res.status === "INACTIVE"){
-				deferred.reject(false);
-			} else {
-				deferred.resolve(res);
-			}
-		})
-		return deferred.promise;
-	}
-
-	/**
-	 * 	Closes the current session
-	 */
-	var closeSession = function() {
-		var deferred = $q.defer();
-		auth.session.close(function(){
-			deferred.resolve("Closed Session");
-		});
-		return deferred.promise;
-	}
-	
-	/**
-	 *	Renews the current ID token
-	 */
-	var renewIdToken = function(token){
-		var deferred = $q.defer();
-		auth.idToken.refresh(token, function(newToken){
-			deferred.resolve(newToken);
-		});
-		return deferred.promise;
-	}
-
-	/**
-	 *	Logs the user out of the current session
-	 */
-	var signout = function() {
-		var deferred = $q.defer();
-		auth.session.exists(function(exists){
-			if(exists){
-				auth.signOut();
-				deferred.resolve("Signed out");
-			} else {
-				deferred.reject("Already Signed Out");
-			}
-		});
-		return deferred.promise;
-	}
-
-	/**
-	 *	Return functions
-	 */
-	return {
-		create : create, 
-		existingSession : existingSession,
-		launchWidget : launchWidget,
-		refreshSession : refreshSession,
-		closeSession : closeSession,
-		renewIdToken : renewIdToken,
 		signout : signout
 	}
 });
