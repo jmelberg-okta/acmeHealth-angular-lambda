@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-var app = angular.module("app", ["ngRoute", "OktaAuthClient", "ApiClient"]);
+var app = angular.module("app", ["ngRoute", "OktaAuthClient", "ApiClient", "OktaConfig"]);
 app.config(function ($routeProvider) {
 	$routeProvider
 	.when("/", {
@@ -42,21 +42,13 @@ app.value("oktaClient", undefined);
 app.value("oktaAuth", undefined);
 app.value("clientScopes", undefined);
 
-app.run(function(authClient){
+app.run(function(authClient, OKTACONFIG){
 	oktaClient = authClient.create({
-		baseUrl: "https://jordandemo.oktapreview.com/",
-		id: "Jw1nyzbsNihSuOETY3R1",
-		redirect: "http://localhost:8080"
+		baseUrl: OKTACONFIG.baseUrl,
+		id: OKTACONFIG.id,
+		redirect: OKTACONFIG.redirect
 	});
 	oktaAuth = authClient;
-
-	// Id Token Scopes
-	clientScopes = [
-		'openid',
-		'email',
-		'profile',
-		'groups'
-		];
 });
 
 // Formats date object into form MM/DD/YYYY
@@ -95,7 +87,7 @@ var filterAppointments = function(appointmentData, date) {
 
 // Route: '/'
 app.controller("ScheduleController",
-	function($scope, $window, $location, $timeout, $route, $rootScope, $anchorScroll, $http, authClient, apiClient) {
+	function($scope, $window, $location, $timeout, $route, $rootScope, apiClient) {
 		$rootScope.layout = "page-Schedule has-sidebar";
 
 		var auth = $window.localStorage["auth"];
@@ -212,7 +204,7 @@ app.controller("ScheduleController",
 
 // Route '/requests'
 app.controller("RequestsController",
-	function($scope, $window, $route, $location, $timeout, $rootScope, authClient, apiClient) {
+	function($scope, $window, $route, $location, $timeout, $rootScope, apiClient) {
 		$rootScope.layout = "page-Requests";
 
 		var auth = $window.localStorage["auth"];
@@ -329,7 +321,7 @@ app.controller("RequestsController",
  * 	Stores the response object in localStorage and sets the current session to true
  */
 app.controller("LoginController",
-	function($scope, $window, $location, $timeout, $rootScope, authClient, apiClient){
+	function($scope, $window, $location, $timeout, $rootScope, authClient, apiClient, OKTACONFIG){
 		
 		// Uncomment when real deal
 
@@ -349,19 +341,19 @@ app.controller("LoginController",
 				var options = {
 					'token' : res.sessionToken,
 					'responseType' : 'id_token', 
-					'scopes' : clientScopes
+					'scopes' : OKTACONFIG.id_scopes
 				};
 
 				// Get idToken and accessToken
 				var tokens = authClient.getIdToken(options);
 				tokens.then(function(idTokenResult) {
 					tokenOptions = {
-						url : 'https://jordandemo.oktapreview.com/',
-						authUrl : '/oauth2/aus7xbiefo72YS2QW0h7/v1/authorize',
+						url : OKTACONFIG.baseUrl,
+						authUrl : OKTACONFIG.authUrl,
 						responseType : 'token',
-						id: 'Jw1nyzbsNihSuOETY3R1',
-						redirect : 'http://localhost:8080/',
-						scopes: ['appointments:read', 'appointments:cancel', 'appointments:edit', 'appointments:confirm']
+						id: OKTACONFIG.id,
+						redirect : OKTACONFIG.redirect,
+						scopes: OKTACONFIG.access_scopes
 					}
 					authClient.getAccessToken(tokenOptions).then(function(result){
 						console.log("Retrieved both tokens\n", result, "\n", idTokenResult);
