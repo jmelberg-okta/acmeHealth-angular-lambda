@@ -13,10 +13,10 @@
       
       <div class="UserMenu">
         <div class="UserMenu-avatar">
-          <img src="{{tokens.idToken.claims.picture}}">
+          <img src="{{idToken.claims.picture}}">
         </div>
         
-        <a class="UserMenu-name" ng-click="signout()">{{tokens.idToken.claims.name}}</a>
+        <a class="UserMenu-name" ng-click="signout()">{{idToken.claims.name}}</a>
         <a class="UserMenu-toggle" ng-click="signout()"></a>
       </div>
     </div>
@@ -53,14 +53,13 @@
 					<p>{{appointment.comment}}</p>
 				</div>
 			</div>
-			
 		</div>
 		<!-- End Appointment Card -->
 		</div>
 	</div>
 </div>
 <div class="AppBody">
-  	<div class="Wrap" ng-show="!appointments.length">
+  	<div class="Wrap" ng-show="appointments.length === 0">
 		<br><br><center>No <b>confirmed</b> requests</center>
     </div>
 </div>

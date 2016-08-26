@@ -13,10 +13,10 @@
       
       <div class="UserMenu">
         <div class="UserMenu-avatar">
-          <img src="{{tokens.idToken.claims.picture}}">
+          <img src="{{idToken.claims.picture}}">
         </div>
         
-        <a class="UserMenu-name" ng-click="signout()">{{tokens.idToken.claims.name}}</a>
+        <a class="UserMenu-name" ng-click="signout()">{{idToken.claims.name}}</a>
         <a class="UserMenu-toggle" ng-click="signout()"></a>
       </div>
       
@@ -33,7 +33,10 @@
           <div class="AppointmentCard-description">
             <strong>{{req.patient}}</strong>
           </div>
-          
+          <div class="AppointmentCard-label">Provider</div>
+          <div class="AppointmentCard-description">
+            <strong>{{req.provider}}</strong>
+          </div>
           <div class="AppointmentCard-label">Reason for Visit</div>
           <div class="AppointmentCard-description">
             <p>{{req.comment}}</p>
@@ -42,24 +45,26 @@
         </div>
 
         <!-- // Provider view -->
-        <div class="AppointmentCard-actions" ng-show="tokens.idToken.claims.groups.indexOf('Providers') >= 0">
+        <div class="AppointmentCard-actions" ng-show="idToken.claims.groups.indexOf('Providers') >= 0">
           <a class="Button--greenOutline" href="#">Suggest new time</a>
           <a class="Button--green" ng-click="confirmAppointment(req)">Confirm</a>
           <a class="Button--gray" ng-click="cancelAppointment(req)">Cancel</a>
         </div>
 
         <!-- // Patient view -->
-        <div class="AppointmentCard-actions" ng-show="tokens.idToken.claims.groups.indexOf('Patients') >= 0">
+        <div class="AppointmentCard-actions" ng-show="idToken.claims.groups.indexOf('Patients') >= 0">
           <a class="Button--gray" ng-click="deleteAppointment(req)">Cancel</a>
         </div>
 
         <!-- // Read-only view -->
-        <div class="AppointmentCard-actions" ng-show="tokens.idToken.claims.groups.indexOf('Providers-read-only') >= 0">
+        <div class="AppointmentCard-actions" ng-show="idToken.claims.groups.indexOf('Providers-read-only') >= 0">
         </div>
       </div>
     </div>
   </div>
-  <div class="Wrap" ng-if="!requests">
-    <center> No <b>current</b> requests. </center>
+</div>
+<div class="AppBody">
+  <div class="Wrap" ng-if="requests.length === 0">
+    <center> No <b>current</b> requests.</center>
   </div>
 </div>
