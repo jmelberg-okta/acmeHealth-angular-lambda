@@ -1,6 +1,5 @@
 # acmehealth-spa
-** Note: Currently uses LocalStorage to save object data (requires refreshing) **
-
+Single Page Application for API Access Management to be demonstrated at Oktane 2016.
 ## Build Instructions
 Once the project is cloned, install [node.js](https://nodejs.org/en/download/) on your machine. Using [npm](https://nodejs.org/en/download/) install [http-server](https://www.npmjs.com/package/http-server).
 
