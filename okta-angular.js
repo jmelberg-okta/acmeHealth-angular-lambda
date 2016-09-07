@@ -184,6 +184,10 @@ angular
 		return deferred.promise;
 	}
 
+	var getClient = function() {
+		return auth;
+	}
+
 	/**
 	 *	Return functions
 	 */
@@ -196,6 +200,7 @@ angular
 		closeSession : closeSession,
 		renewIdToken : renewIdToken,
 		decodeIdToken : decodeIdToken,
-		signout : signout
+		signout : signout,
+		getClient : getClient
 	}
 });

@@ -86,20 +86,21 @@ var filterAppointments = function(appointmentData, date) {
 
 // Route: '/'
 app.controller("ScheduleController",
-	function($scope, $window, $location, $timeout, $route, $rootScope, apiClient) {
+	function($scope, $window, $location, $timeout, $route, $rootScope, authClient, apiClient) {
 		$rootScope.layout = "page-Schedule has-sidebar";
 
-		// Check if authenticated - redirect to login if not
-		if(angular.isUndefined($window.localStorage["auth"])){	$location.url("/login"); }
+		var tokenManager = authClient.getClient().tokenManager;
 
-		// Get current idToken and accessToken
-		var tokens = !angular.isUndefined($window.localStorage["tokens"]) ? JSON.parse($window.localStorage["tokens"]) : undefined;
-		$scope.idToken = tokens.idToken
-				
+		// Check if authenticated - redirect to login if not
+		if(angular.isUndefined(tokenManager.get("idToken"))){	$location.url("/login"); }
+
+		// Get current idToken
+		$scope.idToken = tokenManager.get("idToken")
+		
 		// Get appointments
 		var confirmedAppointments = getConfirmedAppointments();
 		function getConfirmedAppointments() {
-			apiClient.getAppointments(tokens.accessToken.accessToken, tokens.idToken.claims.sub)
+			apiClient.getAppointments(tokenManager.get("accessToken").accessToken, tokenManager.get("idToken").claims.sub)
 			.then(function(appointments) {
 				var appointmentJSON = JSON.parse(appointments).data;
 				var confirmedAppointmentsList = [];
@@ -157,6 +158,7 @@ app.controller("ScheduleController",
 		/**	Clears the localStorage saved in the web browser and scope variables */
 		function clearStorage(){
 			$window.localStorage.clear();
+			authClient.getClient().tokenManager.clear();
 			$scope = $scope.$new(true);
 		}
 
@@ -181,27 +183,22 @@ app.controller("RequestsController",
 	function($scope, $window, $route, $location, $timeout, $rootScope, authClient, apiClient, OKTACONFIG) {
 		$rootScope.layout = "page-Requests";
 		
-		var tokens = !angular.isUndefined($window.localStorage["tokens"]) ? JSON.parse($window.localStorage["tokens"]) : undefined;
-		$scope.idToken = tokens.idToken;
-
+		// Get Token Manager
+		var tokenManager = authClient.getClient().tokenManager;
+		$scope.idToken = tokenManager.get("idToken");
+		
 		// Refresh idToken to check for 'groups'
 		getRequests();
 		function getRequests() {
 			authClient.renewIdToken(OKTACONFIG.id_scopes)
 			.then(function(idToken) {
-				$window.localStorage["tokens"] = angular.toJson({
-					"accessToken" : tokens.accessToken,
-					"idToken" : idToken.idToken
-				});
-				
-				// Update tokens value
-				tokens = JSON.parse($window.localStorage["tokens"]);
-				
+				tokenManager.refresh("idToken", idToken.idToken);
+								
 				// Get all appointments with 'Requested' status
 				var requestedAppointments = getRequestedAppointments();
 
 				function getRequestedAppointments() {
-					apiClient.getAppointments(tokens.accessToken.accessToken, tokens.idToken.claims.sub)
+					apiClient.getAppointments(tokenManager.get("accessToken").accessToken, tokenManager.get("idToken").claims.sub)
 					.then(function(appointments) {
 						var appointmentJSON = JSON.parse(appointments).data;
 						var pendingAppointments = [];
@@ -228,7 +225,7 @@ app.controller("RequestsController",
 
 		// Cancel Appointment (Provider ONLY)
 		$scope.cancelAppointment = function(appointment) {
-			var cancel = apiClient.cancelAppointment(appointment, tokens.accessToken.accessToken);
+			var cancel = apiClient.cancelAppointment(appointment, authClient.getClient().tokenManager.get("accessToken").accessToken);
 			console.log(tokens.accessToken.accessToken);
 			cancel.then(function(res) {
 				getRequests();
@@ -239,7 +236,7 @@ app.controller("RequestsController",
 
 		// Delete Appointment (Patient ONLY)
 		$scope.deleteAppointment = function(appointment) {
-			var deleteAppt = apiClient.deleteAppointment(appointment, tokens.accessToken.accessToken);
+			var deleteAppt = apiClient.deleteAppointment(appointment, authClient.getClient().tokenManager.get("accessToken").accessToken);
 			deleteAppt.then(function(res) {
 				getRequests();
 			}, function(error) {
@@ -249,7 +246,7 @@ app.controller("RequestsController",
 
 		// Confirm Appointment (Provider ONLY)
 		$scope.confirmAppointment = function(appointment) {
-			var confirm = apiClient.confirmAppointment(appointment, tokens.accessToken.accessToken);
+			var confirm = apiClient.confirmAppointment(appointment, authClient.getClient().tokenManager.get("accessToken").accessToken);
 			confirm.then(function(res) {
 				getRequests();
 			}, function(error) {
@@ -260,6 +257,7 @@ app.controller("RequestsController",
 		/**	Clears the localStorage saved in the web browser and scope variables */
 		function clearStorage(){
 			$window.localStorage.clear();
+			authClient.getClient().tokenManager.clear();
 			$scope = $scope.$new(true);
 		}
 
@@ -284,23 +282,19 @@ app.controller("RequestsController",
  * 	Stores the response object in localStorage and sets the current session to true
  */
 app.controller("LoginController",
-	function($scope, $window, $location, $timeout, $rootScope, authClient, apiClient, OKTACONFIG){
+	function($scope, $location, $timeout, $rootScope, authClient, apiClient, OKTACONFIG ){
 		
-		// Uncomment when real deal
+		var tokenManager = authClient.getClient().tokenManager;
 
-		// if(!angular.isUndefined($window.localStorage["session"])){
-		// 	$location.url("/");
-		// }
+		if(!angular.isUndefined(tokenManager.get("idToken"))){
+			$location.url("/");
+		}
 		$rootScope.layout = 'page-Login';
-		
+
 		$scope.authenticate = function(user) {
 			var res = authClient.login(user.email, user.password);
 			res.then(function(res){
 				
-				// update storage
-				$window.localStorage["auth"] = res.auth;
-				$window.localStorage["session"] = res.session;
-
 				var options = {
 					'token' : res.sessionToken,
 					'responseType' : 'id_token', 
@@ -308,6 +302,7 @@ app.controller("LoginController",
 				};
 
 				// Get idToken and accessToken
+
 				var tokens = authClient.getIdToken(options);
 				tokens.then(function(idTokenResult) {
 					tokenOptions = {
@@ -320,10 +315,8 @@ app.controller("LoginController",
 					}
 					authClient.getAccessToken(tokenOptions).then(function(result){
 						console.log("Retrieved both tokens\n", result, "\n", idTokenResult);
-						$window.localStorage["tokens"] = angular.toJson({
-							"idToken" : idTokenResult,
-							"accessToken" : result
-						});
+						tokenManager.add("idToken", idTokenResult);
+						tokenManager.add("accessToken", result);
 						$location.url('/');
 					}, function(error) { console.error(error); });
 				}, function(err) { console.error(err); });		
