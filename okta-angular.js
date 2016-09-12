@@ -1,4 +1,4 @@
-/* 	Author: Jordan Melberg */
+/** Author: Jordan Melberg */
 /** Copyright © 2016, Okta, Inc.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");

@@ -1,4 +1,4 @@
-/* 	Author: Jordan Melberg */
+/** Author: Jordan Melberg */
 /** Copyright © 2016, Okta, Inc.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -40,7 +40,6 @@ app.config(function ($routeProvider) {
  */
 app.value("oktaClient", undefined);
 app.value("oktaAuth", undefined);
-app.value("clientScopes", undefined);
 
 app.run(function(authClient, OKTACONFIG){
 	oktaClient = authClient.create({
@@ -51,53 +50,52 @@ app.run(function(authClient, OKTACONFIG){
 	oktaAuth = authClient;
 });
 
-// Formats date object into form MM/DD/YYYY
-var toJsonDate = function(item) {
-	var itemDate = item.startTime.split('T')[0].split('-');
-	var month = itemDate[1];
-	var day = itemDate[2];
-	var year = itemDate[0];
-	return month+"/"+day+"/"+year
+/** Returns Month (September) from Date Object */
+var getMonthFromDate = function(dateObject) {
+	return dateObject.startTime.split('T')[0].split('-')[1];
 }
 
-// Returns next appointment
-var getFirstAppointment = function(json) {
-	for(var month in json) {
-		if(json.hasOwnProperty(month)) {
-			var date = json[month];
+/** Returns first appointment */
+var getFirstAppointment = function(appointmentsJson) {
+	for(var month in appointmentsJson) {
+		if(appointmentsJson.hasOwnProperty(month)) {
+			var date = appointmentsJson[month];
 			for(var appt in date) {
-				if(date.hasOwnProperty(appt)) {	return date[appt][0];	}
+				if(date.hasOwnProperty(appt)) {	
+					return date[appt][0];	
+				}
 			}
 		}
 	}
 }
 
-// Filter appointments by date and sorted by time
+/** Filter appointments by date and sorted by time */
 var filterAppointments = function(appointmentData, date) {
-	// Date format : MM/DD/YYYY
 	var dailyAppointments = [];
 	angular.forEach(appointmentData, function(item) {
-		var compareDate = item.startTime.split('T')[0];
-		if(compareDate == date){
-			dailyAppointments.push(item);	}
+		if(item.startTime.split('T')[0] == date) { 		// Compare MM/DD/YYYY
+			dailyAppointments.push(item);	
+		}
 	});
 	return dailyAppointments;
 }
 
-// Route: '/'
+/** Route: '/' */
 app.controller("ScheduleController",
 	function($scope, $window, $location, $timeout, $route, $rootScope, authClient, apiClient) {
 		$rootScope.layout = "page-Schedule has-sidebar";
 
 		var tokenManager = authClient.getClient().tokenManager;
 
-		// Check if authenticated - redirect to login if not
-		if(angular.isUndefined(tokenManager.get("idToken"))){	$location.url("/login"); }
+		/** Check if authenticated - redirect to login if not */
+		if(angular.isUndefined(tokenManager.get("idToken"))){	
+			$location.url("/login"); 
+		}
 
-		// Get current idToken
+		/** Get current idToken */
 		$scope.idToken = tokenManager.get("idToken")
 		
-		// Get appointments
+		/** Get appointments */
 		var confirmedAppointments = getConfirmedAppointments();
 		function getConfirmedAppointments() {
 			apiClient.getAppointments(tokenManager.get("accessToken").accessToken, tokenManager.get("idToken").claims.sub)
@@ -122,8 +120,31 @@ app.controller("ScheduleController",
 			});
 		}
 		
+		/**
+		 *	Format all confirmed appointments into JSON following data structure:
+		 *	
+		 *	Example:
+		 *  {
+		 *		 September : {
+		 *			2016-09-01 : [
+		 *				appointmentJSON,
+		 *				appointmentJSON
+		 *			],
+		 *			2016-09-15 : [
+		 *				appointmentJSON,
+		 *				appointmentJSON
+		 *			]
+		 *		 },
+		 *		 October : {
+		 *			2016-10-05 : [
+		 *				appointmentJSON,
+		 *				appointmentJSON
+		 *			]
+		 *		}
+		 *	 }
+		 *
+		 */
 		function parseConfirmedAppointments(confirmedAppointments) {
-			// Format appts
 			var appointmentsByDate = {}
 			angular.forEach(confirmedAppointments, function(item) {
 				var months = [
@@ -131,9 +152,8 @@ app.controller("ScheduleController",
 					"April", "May", "June", "July", "August",
 					"September", "October", "November", "December"
 				];
-				var jsonDate = toJsonDate(item);
+				var month = getMonthFromDate(item); // Returns Month as text 'September'
 				var date = item.startTime.split('T')[0].split('-');
-				var month = jsonDate.split('/')[0];
 				
 				if(!appointmentsByDate[months[month-1]]){
 					appointmentsByDate[months[month-1]] = {};
@@ -143,13 +163,13 @@ app.controller("ScheduleController",
 				}
 				appointmentsByDate[months[month-1]][item.startTime.split('T')[0]].push(item);
 			});
-
 			var firstAppt = getFirstAppointment(appointmentsByDate);
 			var setInitialApptView = filterAppointments(confirmedAppointments, firstAppt.startTime.split('T')[0]);
 			$scope.appointments = setInitialApptView;
 			$scope.sorted = appointmentsByDate;	
 		}
 
+		/** Updates appointment list when date is selected */
 		$scope.updateAppointmentList = function(date) {
 			var appointments = !angular.isUndefined($window.localStorage["appointments"]) ? JSON.parse($window.localStorage["appointments"]) : undefined;
 			$scope.appointments = filterAppointments(appointments, date);
@@ -178,23 +198,23 @@ app.controller("ScheduleController",
 
 });
 
-// Route '/requests'
+/** Route '/requests' */
 app.controller("RequestsController",
 	function($scope, $window, $route, $location, $timeout, $rootScope, authClient, apiClient, OKTACONFIG) {
 		$rootScope.layout = "page-Requests";
 		
-		// Get Token Manager
+		/** Get Token Manager */
 		var tokenManager = authClient.getClient().tokenManager;
 		$scope.idToken = tokenManager.get("idToken");
 		
-		// Refresh idToken to check for 'groups'
+		/** Refresh idToken to check for 'groups' */
 		getRequests();
 		function getRequests() {
 			authClient.renewIdToken(OKTACONFIG.id_scopes)
 			.then(function(idToken) {
 				tokenManager.refresh("idToken", idToken.idToken);
 								
-				// Get all appointments with 'Requested' status
+				/** Get all appointments with 'Requested' status */
 				var requestedAppointments = getRequestedAppointments();
 
 				function getRequestedAppointments() {
@@ -203,7 +223,7 @@ app.controller("RequestsController",
 						var appointmentJSON = JSON.parse(appointments).data;
 						var pendingAppointments = [];
 						
-						// Get all requested appointments
+						/** Get all requested appointments */
 						angular.forEach(appointmentJSON, function(item){
 							if(item.status == "REQUESTED") {
 								pendingAppointments.push(item);
@@ -223,7 +243,7 @@ app.controller("RequestsController",
 			});
 		}
 
-		// Cancel Appointment (Provider ONLY)
+		/** Cancel Appointment (Provider ONLY) */
 		$scope.cancelAppointment = function(appointment) {
 			var cancel = apiClient.cancelAppointment(appointment, authClient.getClient().tokenManager.get("accessToken").accessToken);
 			console.log(tokens.accessToken.accessToken);
@@ -234,7 +254,7 @@ app.controller("RequestsController",
 			});
 		}
 
-		// Delete Appointment (Patient ONLY)
+		/** Delete Appointment (Patient ONLY) */
 		$scope.deleteAppointment = function(appointment) {
 			var deleteAppt = apiClient.deleteAppointment(appointment, authClient.getClient().tokenManager.get("accessToken").accessToken);
 			deleteAppt.then(function(res) {
@@ -244,7 +264,7 @@ app.controller("RequestsController",
 			});
 		}
 
-		// Confirm Appointment (Provider ONLY)
+		/** Confirm Appointment (Provider ONLY) */
 		$scope.confirmAppointment = function(appointment) {
 			var confirm = apiClient.confirmAppointment(appointment, authClient.getClient().tokenManager.get("accessToken").accessToken);
 			confirm.then(function(res) {
@@ -301,10 +321,10 @@ app.controller("LoginController",
 					'scopes' : OKTACONFIG.id_scopes
 				};
 
-				// Get idToken and accessToken
-
+				/** Get idToken and accessToken */
 				var tokens = authClient.getIdToken(options);
 				tokens.then(function(idTokenResult) {
+					/** Get accessToken from custom authorization server */
 					tokenOptions = {
 						url : OKTACONFIG.baseUrl,
 						authUrl : OKTACONFIG.authUrl,
