@@ -1,7 +1,7 @@
 angular
 .module("OktaConfig", [])
 .constant('OKTACONFIG', {
-	baseUrl : "https://jordandemo.oktapreview.com/",
+	baseUrl : "https://example.oktapreview.com/",
 	id: "Jw1nyzbsNihSuOETY3R1",
 	redirect: "http://localhost:8080",
 	authUrl : '/oauth2/aus7xbiefo72YS2QW0h7/v1/authorize',
