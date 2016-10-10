@@ -88,13 +88,13 @@ app.controller("ScheduleController",
 		var tokenManager = authClient.getClient().tokenManager;
 
 		/** Check if authenticated - redirect to login if not */
-		if(angular.isUndefined(tokenManager.get("idToken"))){	
+		if(angular.isUndefined(tokenManager.get("idToken")) || angular.isUndefined(tokenManager.get("accessToken"))){
 			$location.url("/login"); 
 		}
 
 		/** Get current idToken */
-		$scope.idToken = tokenManager.get("idToken")
-		
+		$scope.idToken = tokenManager.get("idToken");
+
 		/** Get appointments */
 		var confirmedAppointments = getConfirmedAppointments();
 		function getConfirmedAppointments() {
