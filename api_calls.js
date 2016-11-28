@@ -3,7 +3,11 @@ angular
 .factory("apiClient", function($q, $http, $timeout) {
 
 	// Endpoint for resource server
-	var BASE_URL = "http://localhost:8088";
+	// var BASE_URL = "http://localhost:8088";
+
+	// AWS Lambda Endpoint
+	var BASE_URL = "https://z12esvqjs7.execute-api.us-east-1.amazonaws.com/dev"
+	
 	var apiClient = {};
 
 	apiClient.getAppointments = function(token, filter) {
@@ -22,7 +26,7 @@ angular
 				deferred.reject(res.data.Error);
 			}
 			else {
-				deferred.resolve(angular.toJson(res));
+				deferred.resolve(angular.toJson(res.data.message));
 			}	
 		}, function(err) {deferred.reject(err)});
 		return deferred.promise;

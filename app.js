@@ -100,7 +100,7 @@ app.controller("ScheduleController",
 		function getConfirmedAppointments() {
 			apiClient.getAppointments(tokenManager.get("accessToken").accessToken, tokenManager.get("idToken").claims.sub)
 			.then(function(appointments) {
-				var appointmentJSON = JSON.parse(appointments).data;
+				var appointmentJSON = JSON.parse(appointments);
 				var confirmedAppointmentsList = [];
 				angular.forEach(appointmentJSON, function(item){
 					if(item.status == "CONFIRMED") {
@@ -220,7 +220,7 @@ app.controller("RequestsController",
 				function getRequestedAppointments() {
 					apiClient.getAppointments(tokenManager.get("accessToken").accessToken, tokenManager.get("idToken").claims.sub)
 					.then(function(appointments) {
-						var appointmentJSON = JSON.parse(appointments).data;
+						var appointmentJSON = JSON.parse(appointments);
 						var pendingAppointments = [];
 						
 						/** Get all requested appointments */
@@ -303,7 +303,6 @@ app.controller("RequestsController",
  */
 app.controller("LoginController",
 	function($scope, $location, $timeout, $rootScope, authClient, apiClient, OKTACONFIG ){
-		
 		var tokenManager = authClient.getClient().tokenManager;
 
 		if(!angular.isUndefined(tokenManager.get("idToken"))){
@@ -327,7 +326,8 @@ app.controller("LoginController",
 					/** Get accessToken from custom authorization server */
 					tokenOptions = {
 						url : OKTACONFIG.baseUrl,
-						authUrl : OKTACONFIG.authUrl,
+						issuer: OKTACONFIG.authUrl,
+						authUrl: "https://example.oktapreview.com/oauth2/aus8p24lycw4wg8Eg0h7/v1/authorize",
 						responseType : 'token',
 						id: OKTACONFIG.id,
 						redirect : OKTACONFIG.redirect,

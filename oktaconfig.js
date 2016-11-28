@@ -3,8 +3,8 @@ angular
 .constant('OKTACONFIG', {
 	baseUrl : "https://example.oktapreview.com/",
 	id: "GJv1mKQtUAUbTalBeQLs",
-	redirect: "http://localhost:8080",
-	authUrl : '/oauth2/aus80l8xhvgeoUgwr0h7/v1/authorize',
+	redirect: "http://localhost:3000",
+	authUrl : 'https://example.oktapreview.com/oauth2/aus8p24lycw4wg8Eg0h7/',
 	id_scopes: [
 		'openid',
 		'email',
@@ -12,11 +12,11 @@ angular
 		'groups'
 		],
 	access_scopes: [
-		'appointments:read',
-		'appointments:cancel',
-		'appointments:edit',
-		'appointments:confirm'
-		]
+		"appointments:read",
+        "appointments:write",
+        "appointments:cancel",
+        "providers:read"
+	]
 });
 
 

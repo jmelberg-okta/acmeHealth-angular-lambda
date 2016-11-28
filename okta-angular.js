@@ -95,18 +95,21 @@ angular
 
 	/** Retrieves accessToken creating new authJS object */
 	var getAccessToken = function(options) {
+
 		var tokenAuth = new OktaAuth({
 			url: options.url,
+			issuer: options.issuer,
 			clientId : options.id,
 			redirectUri: options.redirect,
-			authorizationUrl : options.authUrl
+			authorizeUrl: options.authUrl
 		});
+		
 		var deferred = $q.defer();
 		var accessToken = tokenAuth.token.getWithoutPrompt({
+			issuer : options.authUrl,
 			responseType : options.responseType,
 			scopes : options.scopes
-		});
-		accessToken.then(function(res) {
+		}).then(function(res) {
 			deferred.resolve(res);
 		}, function(error) {
 			deferred.reject(error);
