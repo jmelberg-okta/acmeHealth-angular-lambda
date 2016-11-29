@@ -206,6 +206,7 @@ app.controller("RequestsController",
 		/** Get Token Manager */
 		var tokenManager = authClient.getClient().tokenManager;
 		$scope.idToken = tokenManager.get("idToken");
+		$scope.accessToken = tokenManager.get("accessToken");
 		
 		/** Refresh idToken to check for 'groups' */
 		getRequests();
@@ -246,7 +247,6 @@ app.controller("RequestsController",
 		/** Cancel Appointment (Provider ONLY) */
 		$scope.cancelAppointment = function(appointment) {
 			var cancel = apiClient.cancelAppointment(appointment, authClient.getClient().tokenManager.get("accessToken").accessToken);
-			console.log(tokens.accessToken.accessToken);
 			cancel.then(function(res) {
 				getRequests();
 			}, function(error) {
@@ -266,6 +266,7 @@ app.controller("RequestsController",
 
 		/** Confirm Appointment (Provider ONLY) */
 		$scope.confirmAppointment = function(appointment) {
+			console.log(appointment);
 			var confirm = apiClient.confirmAppointment(appointment, authClient.getClient().tokenManager.get("accessToken").accessToken);
 			confirm.then(function(res) {
 				getRequests();

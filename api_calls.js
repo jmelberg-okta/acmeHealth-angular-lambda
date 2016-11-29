@@ -1,12 +1,12 @@
 angular
-.module("ApiClient", [])
-.factory("apiClient", function($q, $http, $timeout) {
+.module("ApiClient", ["OktaConfig"])
+.factory("apiClient", function($q, $http, $timeout, OKTACONFIG) {
 
 	// Endpoint for resource server
 	// var BASE_URL = "http://localhost:8088";
 
 	// AWS Lambda Endpoint
-	var BASE_URL = "https://z12esvqjs7.execute-api.us-east-1.amazonaws.com/dev"
+	var BASE_URL = OKTACONFIG.apiUrl;
 	
 	var apiClient = {};
 
@@ -35,7 +35,7 @@ angular
 	apiClient.confirmAppointment = function(appointment, token) {
 		appointment["status"] = "CONFIRMED"
 		var deferred = $q.defer();
-		api_url = BASE_URL + "/appointments/" + appointment["_id"];
+		api_url = BASE_URL + "/appointments/" + appointment["id"];
 		$http({
 			method: "PUT",
 			url : api_url,
@@ -56,7 +56,7 @@ angular
 	apiClient.cancelAppointment = function(appointment, token) {
 		appointment["status"] = "DENIED"
 		var deferred = $q.defer();
-		api_url = BASE_URL + "/appointments/" + appointment["_id"];
+		api_url = BASE_URL + "/appointments/" + appointment["id"];
 		$http({
 			method: "PUT",
 			url : api_url,
@@ -76,7 +76,7 @@ angular
 
 	apiClient.deleteAppointment = function(appointment, token) {
 		var deferred = $q.defer();
-		api_url = BASE_URL + "/appointments/" +appointment["_id"];
+		api_url = BASE_URL + "/appointments/" +appointment["id"];
 		$http({
 			method: "DELETE",
 			url : api_url,
